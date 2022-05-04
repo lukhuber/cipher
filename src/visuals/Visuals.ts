@@ -1,17 +1,34 @@
 const ANCHOR: { x: number; y: number } = { x: 1, y: 1 };
 const OPACITY_TEXT: number = 0.5;
 const OPACITY_BOXES: number = 0.2;
-const OPACITY_BARS: number = 0.1;
+const OPACITY_BARS: number = 0.2;
 const FONTSIZE: number = 0.7;
 const PANEL_WIDTH: number = 7;
 
-export class RoomStatistics {
-	static display(room: Room) {
-		RoomStatistics.bars(room);
-		RoomStatistics.creepsStats(room);
+export class Visuals {
+	static displayStatistics(room: Room): void {
+		Visuals.bars(room);
+		Visuals.creepsStats(room);
 	}
 
-	private static bars(room: Room) {
+	static displayEuclidDist(room: Room): void {
+		const euclideanDistance = room.memory.euclideanDistance;
+
+		for (let x = 0; x < 50; x++) {
+			for (let y = 0; y < 50; y++) {
+				if (euclideanDistance[x][y] == 0) {
+					continue;
+				}
+				const green: number = euclideanDistance[x][y] * 17;
+				const white: number = parseInt('ff', 16);
+				const color: string =
+					'#' + (white - green).toString(16).padStart(2, '0') + 'ff' + (white - green).toString(16).padStart(2, '0');
+				new RoomVisual(room.name).text(String(euclideanDistance[x][y]), x, y + 0.25, { color: color });
+			}
+		}
+	}
+
+	private static bars(room: Room): void {
 		// Define where the bars should be ---------------------------------------------------------------------------------
 		const cpuPos: { x: number; y: number } = { x: ANCHOR.x, y: ANCHOR.y + 0 };
 		const bktPos: { x: number; y: number } = { x: ANCHOR.x, y: ANCHOR.y + 1 };
@@ -52,7 +69,7 @@ export class RoomStatistics {
 		percentages.text(gclPer, gclPos.x + PANEL_WIDTH / 2 + 1, gclPos.y, { opacity: OPACITY_TEXT, font: FONTSIZE });
 	}
 
-	private static creepsStats(room: Room) {
+	private static creepsStats(room: Room): void {
 		// Define the anchor of this box -----------------------------------------------------------------------------------
 		const pos: { x: number; y: number } = { x: ANCHOR.x, y: ANCHOR.y + 2.5 };
 		const styleHeading: { opacity: number; font: number; align: 'center' | 'left' | 'right' | undefined } = {
@@ -72,7 +89,7 @@ export class RoomStatistics {
 		creepsStats.rect(pos.x, pos.y, PANEL_WIDTH, 1, { opacity: 0.1 });
 
 		// Fill the box with labels (aka. text) ----------------------------------------------------------------------------
-		creepsStats.text(room.name + ' creeps', pos.x + 0.2, pos.y + 0.75, styleHeading);
+		creepsStats.text(room.name + ' Creeps', pos.x + 0.2, pos.y + 0.75, styleHeading);
 		creepsStats.text('Queen', pos.x + 0.2, pos.y + 1.75, styleText);
 		creepsStats.text('Harvester', pos.x + 0.2, pos.y + 2.75, styleText);
 		creepsStats.text('Upgrader', pos.x + 0.2, pos.y + 3.75, styleText);

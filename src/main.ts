@@ -18,8 +18,9 @@
 // Import all needed files =============================================================================================
 import './prototypes/RoomVisual';
 import { ErrorMapper } from 'utils/ErrorMapper';
-import { ROOM_STATISTICS } from './settings';
-import { RoomStatistics } from './visuals/RoomStatistics';
+import { ROOM_STATISTICS, ROOM_EUCLID_DIST } from './settings';
+import { Architect } from './architect/Architect';
+import { Visuals } from './visuals/Visuals';
 // =====================================================================================================================
 
 // Main loop
@@ -28,9 +29,17 @@ export const loop = ErrorMapper.wrapLoop(() => {
 	for (const i in Game.rooms) {
 		const room: Room = Game.rooms[i];
 
+		if (!room.memory.isInitialized) {
+			Architect.init(room);
+		}
+
 		// Show room statistics --------------------------------------------------------------------------------------------
-		if (ROOM_STATISTICS) {
-			RoomStatistics.display(room);
+		if (ROOM_STATISTICS && Game.cpu.bucket > 9000) {
+			Visuals.displayStatistics(room);
+		}
+
+		if (ROOM_EUCLID_DIST) {
+			Visuals.displayEuclidDist(room);
 		}
 	}
 });

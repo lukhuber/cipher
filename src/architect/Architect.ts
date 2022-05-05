@@ -1,4 +1,13 @@
 import { calcEuclideanDistance } from '.././algorithms/euclideanDistance';
+import {
+	updateBunkerRCL2,
+	updateBunkerRCL3,
+	updateBunkerRCL4,
+	updateBunkerRCL5,
+	updateBunkerRCL6,
+	updateBunkerRCL7,
+	updateBunkerRCL8
+} from './bunkerLayout';
 
 export class Architect {
 	static init(room: Room): void {
@@ -7,8 +16,12 @@ export class Architect {
 		Architect.placeBunkerAnchor(room);
 		Architect.placeMiningSiteAnchors(room);
 		Architect.placeUpgradeSiteAnchor(room);
-		
+
 		room.memory.isInitialized = true;
+	}
+
+	static run(room: Room): void {
+		Architect.updateBunker(room);
 	}
 
 	private static placeBunkerAnchor(room: Room): void {
@@ -42,7 +55,7 @@ export class Architect {
 			const spawn: StructureSpawn = s.pos.findClosestByPath(FIND_MY_SPAWNS);
 			const path: PathStep[] = s.pos.findPathTo(spawn);
 			const flagPos: RoomPosition = new RoomPosition(path[0].x, path[0].y, room.name);
-			const index = sources.indexOf(s);
+			const index: number = sources.indexOf(s);
 
 			flagPos.createFlag(room.name + ' mining site ' + index);
 		}
@@ -58,6 +71,28 @@ export class Architect {
 			const flagPos: RoomPosition = new RoomPosition(path[1].x, path[1].y, room.name);
 
 			flagPos.createFlag(room.name + ' upgrade site');
+		}
+	}
+
+	private static updateBunker(room: Room): void {
+		// @ts-ignore: Object is possibly 'null'.
+		const roomLevel: number | undefined = room.controller.level;
+		const anchorPos: RoomPosition = Game.flags[room.name].pos;
+
+		if (roomLevel >= 2) {
+			updateBunkerRCL2(room, anchorPos);
+		} else if (roomLevel >= 3) {
+			updateBunkerRCL3(room, anchorPos);
+		} else if (roomLevel >= 4) {
+			updateBunkerRCL4(room, anchorPos);
+		} else if (roomLevel >= 5) {
+			updateBunkerRCL5(room, anchorPos);
+		} else if (roomLevel >= 6) {
+			updateBunkerRCL6(room, anchorPos);
+		} else if (roomLevel >= 7) {
+			updateBunkerRCL7(room, anchorPos);
+		} else if (roomLevel >= 8) {
+			updateBunkerRCL8(room, anchorPos);
 		}
 	}
 }

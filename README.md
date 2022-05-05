@@ -30,14 +30,15 @@ To compile and deploy the code use one of the following commands (depending on t
 ### Current features
 
 - Statistics overview in each `room` using `RoomVisual` (very rudimentary)
+- Automatic bunker planning and building
+- Modular approach to codebase
+  - `Architect` responsible for `room` initialization
 
 ### Upcoming features
 
-- Automatic bunker planning
 - Assignment of `Tasks` to idle creeps
 - Independent mining and upgrade sites
 - Modular approach to codebase
-  - Implementation of `Architect`
   - Implementation of `Manager`
   - Implementation of `Supervisor`
 

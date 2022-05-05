@@ -29,9 +29,13 @@ export const loop = ErrorMapper.wrapLoop(() => {
 	for (const i in Game.rooms) {
 		const room: Room = Game.rooms[i];
 
+    // Calculate euclidean distance and place flags for room -----------------------------------------------------------
 		if (!room.memory.isInitialized) {
 			Architect.init(room);
 		}
+
+    // Place constructions sites in room (Should maybe only be all every 100 ticks) ------------------------------------
+    Architect.run(room)
 
 		// Show room statistics --------------------------------------------------------------------------------------------
 		if (ROOM_STATISTICS && Game.cpu.bucket > 9000) {

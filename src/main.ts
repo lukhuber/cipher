@@ -32,7 +32,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
 	// Cycle through each room and run each component --------------------------------------------------------------------
 	for (const i in Game.rooms) {
 		const room: Room = Game.rooms[i];
-    Console.init();
+    Console.init();                                         // Provides console commands
 
     // Prepare room for subsequent code --------------------------------------------------------------------------------
 		if (!room.memory.isInitialized) {

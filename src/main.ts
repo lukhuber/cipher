@@ -17,9 +17,13 @@
 
 // Import all needed files =============================================================================================
 import './prototypes/RoomVisual';
+import './prototypes/Room';
 import { ErrorMapper } from 'utils/ErrorMapper';
 import { ROOM_STATISTICS, ROOM_EUCLID_DIST } from './settings';
+import { Console } from './console/Console'
+import { Memory} from './memory/Memory';
 import { Architect } from './architect/Architect';
+import { Manager } from './manager/Manager';
 import { Visuals } from './visuals/Visuals';
 // =====================================================================================================================
 
@@ -28,15 +32,20 @@ export const loop = ErrorMapper.wrapLoop(() => {
 	// Cycle through each room and run each component --------------------------------------------------------------------
 	for (const i in Game.rooms) {
 		const room: Room = Game.rooms[i];
+    Console.init();
 
-    // Calculate euclidean distance and place flags for room -----------------------------------------------------------
+    // Prepare room for subsequent code --------------------------------------------------------------------------------
 		if (!room.memory.isInitialized) {
-			Architect.init(room);
+			Architect.init(room);                                 // Calc euclidean distance and place flags
+      Memory.init(room);                                    // Prepare memory for all entities in room
 		}
 
-    // Place constructions sites in room (Should maybe only be all every 100 ticks) ------------------------------------
-    Architect.run(room)
-
+    // Check for new work and create requests --------------------------------------------------------------------------
+    if (room.memory.isInitialized) {
+      Architect.run(room);                                  // Place construction sites
+      Manager.init(room);                                   // Create request for undone work
+    }
+    
 		// Show room statistics --------------------------------------------------------------------------------------------
 		if (ROOM_STATISTICS && Game.cpu.bucket > 9000) {
 			Visuals.displayStatistics(room);

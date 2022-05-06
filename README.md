@@ -29,10 +29,11 @@ To compile and deploy the code use one of the following commands (depending on t
 
 ### Current features
 
-- Statistics overview in each `room` using `RoomVisual` (very rudimentary)
+- Statistics overview in each `room` using `RoomVisual` (very rudimentary
 - Automatic bunker planning and building
 - Modular approach to codebase
   - `Architect` responsible for `room` initialization
+- Not so smart creep spawner
 
 ### Upcoming features
 

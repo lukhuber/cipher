@@ -6,15 +6,16 @@ interface Room {
 	getCreepsByRole(role: string): Creep[];
 }
 
-type SinkUnit = StructureSpawn |
-	StructureExtension |
-	StructureLab |
-	StructurePowerSpawn |
-	StructureNuker |
-	StructureTower;
+type SinkUnit = 
+	| StructureSpawn
+	| StructureExtension
+	| StructureLab
+	| StructurePowerSpawn
+	| StructureNuker
+	| StructureTower;
 
 type StorageUnit = StructureContainer | StructureTerminal | StructureStorage;
 
 type RequestTypes = 'spawn' | 'build' | 'fill' | 'repair';
 
-type Roles = 'harvester' | 'worker' | 'upgrader' | 'transporter' | 'queen' | undefined;
+type Roles = 'harvester' | 'worker' | 'upgrader' | 'transporter' | 'queen';

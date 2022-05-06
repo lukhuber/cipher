@@ -1,10 +1,10 @@
 export class Request {
 	type: RequestTypes;
-	role: Roles;
-	target: ConstructionSite | SinkUnit | StorageUnit | undefined;
 	priority: number;
-
-	constructor(type: RequestTypes, priority: number, role: Roles  = undefined, target: ConstructionSite | SinkUnit | StorageUnit | undefined = undefined) {
+	role?: Roles;
+	target?: ConstructionSite | SinkUnit | StorageUnit;
+	
+	constructor(type: RequestTypes, priority: number, role?: Roles , target?: ConstructionSite | SinkUnit | StorageUnit) {
 		this.type = type;
 		this.priority = priority;
 		this.role = role

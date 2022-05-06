@@ -32,20 +32,20 @@ export const loop = ErrorMapper.wrapLoop(() => {
 	// Cycle through each room and run each component --------------------------------------------------------------------
 	for (const i in Game.rooms) {
 		const room: Room = Game.rooms[i];
-    Console.init();                                         // Provides console commands
+		Console.init();                                         // Provides console commands
 
-    // Prepare room for subsequent code --------------------------------------------------------------------------------
+		// Prepare room for subsequent code --------------------------------------------------------------------------------
 		if (!room.memory.isInitialized) {
 			Architect.init(room);                                 // Calc euclidean distance and place flags
-      Memory.init(room);                                    // Prepare memory for all entities in room
+			Memory.init(room);                                    // Prepare memory for all entities in room
 		}
 
-    // Check for new work and create requests --------------------------------------------------------------------------
-    if (room.memory.isInitialized) {
-      Architect.run(room);                                  // Place construction sites
-      Manager.init(room);                                   // Create request for undone work
-    }
-    
+		// Check for new work and create requests --------------------------------------------------------------------------
+		if (room.memory.isInitialized) {
+		  Architect.run(room);                                  // Place construction sites
+		  Manager.init(room);                                   // Create request for undone work
+		}
+		
 		// Show room statistics --------------------------------------------------------------------------------------------
 		if (ROOM_STATISTICS && Game.cpu.bucket > 9000) {
 			Visuals.displayStatistics(room);

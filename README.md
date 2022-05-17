@@ -34,6 +34,7 @@ To compile and deploy the code use one of the following commands (depending on t
 - Modular approach to codebase
   - `Architect` responsible for `room` initialization and base planning
   - `Manager` responsible for creation of `Requests`
+  - `Supervisor` responsible for assigment of `Requests`
 - Not so smart creep spawner
 - Various console commands
 
@@ -41,8 +42,6 @@ To compile and deploy the code use one of the following commands (depending on t
 
 - Assignment of `Tasks` to idle creeps
 - Independent mining and upgrade sites
-- Modular approach to codebase
-  - Implementation of `Supervisor`
 
 These feature are not in any particular order, but represent a simple TODO list for me
 

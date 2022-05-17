@@ -8,15 +8,15 @@ export class Console {
 	}
 
 	static help(): string {
-		let helpMessage: string = ''
+		let helpMessage: string = '';
 
-		helpMessage += 'cipher v0.0.1 \n\n'
+		helpMessage += 'cipher v0.0.1 \n\n';
 
-		helpMessage += 'help()                        This Message\n'
-		helpMessage += 'report(roomName?)             Creates a report of all requests (in a room)\n'
-		helpMessage += 'clearAllRequests(roomName?)   Deletes all requests (in a room)\n'
+		helpMessage += 'help()                        This Message\n';
+		helpMessage += 'report(roomName?)             Creates a report of all requests (in a room)\n';
+		helpMessage += 'clearAllRequests(roomName?)   Deletes all requests (in a room)\n';
 
-		return(helpMessage)
+		return helpMessage;
 	}
 
 	static clearAllRequests(roomName?: string): void {
@@ -44,10 +44,16 @@ export class Console {
 
 	static reportSpawnRequests(roomName?: string): void {
 		let report: string =
-			'\n' + '\tSpawn requests\n' + '╔════════╤═════════════╤══════════╗\n' + '║ ROOM   │ ROLE        │ PRIORITY ║\n';
+			'\n' +
+			'\tSpawn requests\n' +
+			'╔════════╤═════════════╤══════════╗\n' +
+			'║ ROOM   │ ROLE        │ PRIORITY ║\n';
 
 		if (roomName) {
-			let spawnRequests: Request[] = _.filter(Game.rooms[roomName].memory.Requests, (r) => r.type === 'spawn');
+			let spawnRequests: Request[] = _.filter(
+				Game.rooms[roomName].memory.Requests,
+				(r) => r.type === 'spawn'
+			);
 			spawnRequests = _.sortBy(spawnRequests, (r) => r.priority, 'desc');
 
 			for (const s of spawnRequests) {
@@ -61,13 +67,18 @@ export class Console {
 						s.priority.toString().padEnd(8, ' ') +
 						' ║\n';
 				} else {
-					throw new Error('Property "role" of spawn request is not type "string"!');
+					throw new Error(
+						'Property "role" of spawn request is not type "string"!'
+					);
 				}
 			}
 		} else {
 			for (const r in Game.rooms) {
 				const room = Game.rooms[r];
-				let spawnRequests: Request[] = _.filter(room.memory.Requests, (r) => r.type === 'spawn');
+				let spawnRequests: Request[] = _.filter(
+					room.memory.Requests,
+					(r) => r.type === 'spawn'
+				);
 				spawnRequests = _.sortBy(spawnRequests, (r) => r.priority, 'desc');
 
 				for (const s of spawnRequests) {
@@ -81,7 +92,9 @@ export class Console {
 							s.priority.toString().padEnd(8, ' ') +
 							' ║\n';
 					} else {
-						throw new Error('Property "role" of spawn request is not type "string"!');
+						throw new Error(
+							'Property "role" of spawn request is not type "string"!'
+						);
 					}
 				}
 			}

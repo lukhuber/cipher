@@ -2,8 +2,21 @@ import { Request } from '.././request/Request';
 
 export class Console {
 	static init(): void {
+		global.help = this.help;
 		global.clearAllRequests = this.clearAllRequests;
 		global.report = this.report;
+	}
+
+	static help(): string {
+		let helpMessage: string = ''
+
+		helpMessage += 'cipher v0.0.1 \n\n'
+
+		helpMessage += 'help()                        This Message\n'
+		helpMessage += 'report(roomName?)             Creates a report of all requests (in a room)\n'
+		helpMessage += 'clearAllRequests(roomName?)   Deletes all requests (in a room)\n'
+
+		return(helpMessage)
 	}
 
 	static clearAllRequests(roomName?: string): void {

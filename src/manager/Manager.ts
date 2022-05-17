@@ -2,30 +2,36 @@ import { Request } from '.././request/Request';
 
 export class Manager {
 	static init(room: Room): void {
-
-		Manager.monitorMiningSites(room);
-		Manager.monitorUpgradeSite(room);
-		Manager.manageWorkerCount(room);
+		Manager.monitorMiningSites(room);								// Creates spawn requests for harvesters. One for each source
+		Manager.monitorUpgradeSite(room);								// Creates spawn requests for upgraders. Always just one
+		Manager.manageWorkerCount(room);								// Creates spawn requests for workers, depending on available energy
 	}
 
 	private static monitorMiningSites(room: Room): void {
-		const flags: Flag[] = _.filter(Game.flags, (f) => f.name.includes(room.name + ' mining site'));
+		const flags: Flag[] = _.filter(Game.flags, (f) =>
+			f.name.includes(room.name + ' mining site')
+		);
 
 		// Cycle through all flags. Check if assigned harvester is still alive. Else create request. -----------------------
-		for (let f of flags) {
+		for (const f of flags) {
 			// Check if assigned harvester is dead or never existed (new room) -----------------------------------------------
 			// @ts-ignore: Object is possibly 'null'.
-			if (f.memory.assignedHarvester === undefined || !Game.creeps[f.memory.assignedHarvester.name]) {
+			if (
+				f.memory.assignedHarvester === undefined ||
+				!Game.creeps[f.memory.assignedHarvester.name]
+			) {
 				Game.flags[f.name].memory.assignedHarvester = undefined;
 				const requestQueue: Request[] = room.memory.Requests;
 
 				// Get spawn requests for harvesters. We don't want to create another one --------------------------------------
-				let harvesterRequests: number = requestQueue.filter((r) => r.type === 'spawn' && r.role === 'harvester').length;
+				const harvesterRequests: number = requestQueue.filter(
+					(r) => r.type === 'spawn' && r.role === 'harvester'
+				).length;
 
 				// Get spawns spawning harvesters. We don't want to create a request, if a harvester is spawning ---------------
 				const spawns: StructureSpawn[] = room.find(FIND_MY_SPAWNS);
 				let harvesterSpawning: number = 0;
-				for (let s of spawns) {
+				for (const s of spawns) {
 					const spawn: StructureSpawn = Game.spawns[s.name];
 					if (spawn.spawning && spawn.spawning.name.includes('harvester')) {
 						harvesterSpawning += 1;
@@ -34,7 +40,7 @@ export class Manager {
 
 				// Create request, if no harvester is spawning and no request is pending ---------------------------------------
 				if (harvesterRequests === 0 && harvesterSpawning === 0) {
-					console.log("Still trying to spawn harvesters")
+					console.log('Still trying to spawn harvesters');
 					const r: Request = new Request('spawn', 10, 'harvester');
 					room.memory.Requests.push(r);
 				}
@@ -44,7 +50,7 @@ export class Manager {
 		// Check if all harvesters are assigned to mining sites ------------------------------------------------------------
 		const harvesters: Creep[] = room.getCreepsByRole('harvester');
 
-		for (let h of harvesters) {
+		for (const h of harvesters) {
 			const creep = Game.creeps[h.name];
 
 			if (!creep.memory.assignedMiningSite) {
@@ -53,7 +59,6 @@ export class Manager {
 						return !f.memory.assignedHarvester && f.name.includes('mining');
 					},
 				})[0];
-
 				creep.memory.assignedMiningSite = freeMiningSite.name;
 				freeMiningSite.memory.assignedHarvester = creep;
 			}
@@ -61,21 +66,28 @@ export class Manager {
 	}
 
 	private static monitorUpgradeSite(room: Room): void {
-		const f: Flag = _.filter(Game.flags, (f) => f.name.includes(room.name + ' upgrade site'))[0];
+		const f: Flag = _.filter(Game.flags, (f) =>
+			f.name.includes(room.name + ' upgrade site')
+		)[0];
 
 		// Check if assigned harvester is dead or never existed (new room) -------------------------------------------------
 		// @ts-ignore: Object is possibly 'null'.
-		if (f.memory.assignedUpgrader === undefined || !Game.creeps[f.memory.assignedUpgrader.name]) {
+		if (
+			f.memory.assignedUpgrader === undefined ||
+			!Game.creeps[f.memory.assignedUpgrader.name]
+		) {
 			Game.flags[f.name].memory.assignedUpgrader = undefined;
 			const requestQueue: Request[] = room.memory.Requests;
 
 			// Get spawn requests for harvesters. We don't want to create another one ----------------------------------------
-			const upgraderRequests: number = requestQueue.filter((r) => r.type === 'spawn' && r.role === 'upgrader').length;
+			const upgraderRequests: number = requestQueue.filter(
+				(r) => r.type === 'spawn' && r.role === 'upgrader'
+			).length;
 
 			// Get spawns spawning harvesters. We don't want to create a request, if a harvester is spawning -----------------
 			const spawns: StructureSpawn[] = room.find(FIND_MY_SPAWNS);
 			let upgraderSpawning: number = 0;
-			for (let s of spawns) {
+			for (const s of spawns) {
 				const spawn: StructureSpawn = Game.spawns[s.name];
 				if (spawn.spawning && spawn.spawning.name.includes('upgrader')) {
 					upgraderSpawning += 1;
@@ -92,13 +104,15 @@ export class Manager {
 		// Check if an upgrader is assigned to upgrade sites ---------------------------------------------------------------
 		const upgraders: Creep[] = room.getCreepsByRole('upgrader');
 
-		for (let upgrader of upgraders) {
+		for (const upgrader of upgraders) {
 			const creep: Creep = Game.creeps[upgrader.name];
 
 			if (!creep.memory.assignedUpgradeSite) {
 				const flagFreeUpgradeSite = room.find(FIND_FLAGS, {
 					filter: (flag) => {
-						return !flag.memory.assignedUpgrader && flag.name.includes('upgrade');
+						return (
+							!flag.memory.assignedUpgrader && flag.name.includes('upgrade')
+						);
 					},
 				})[0];
 
@@ -115,12 +129,14 @@ export class Manager {
 			const requestQueue: Request[] = room.memory.Requests;
 
 			// Get spawn requests for harvesters. We don't want to create another one ----------------------------------------
-			const upgraderRequests: number = requestQueue.filter((r) => r.type === 'spawn' && r.role === 'worker').length;
+			const upgraderRequests: number = requestQueue.filter(
+				(r) => r.type === 'spawn' && r.role === 'worker'
+			).length;
 
 			// Get spawns spawning harvesters. We don't want to create a request, if a harvester is spawning -----------------
 			const spawns: StructureSpawn[] = room.find(FIND_MY_SPAWNS);
 			let upgraderSpawning: number = 0;
-			for (let s of spawns) {
+			for (const s of spawns) {
 				const spawn: StructureSpawn = Game.spawns[s.name];
 				if (spawn.spawning && spawn.spawning.name.includes('worker')) {
 					upgraderSpawning += 1;
@@ -132,6 +148,6 @@ export class Manager {
 				const spawnRequest: Request = new Request('spawn', 8, 'worker');
 				room.memory.Requests.push(spawnRequest);
 			}
-		} 
+		}
 	}
 }

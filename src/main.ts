@@ -18,6 +18,7 @@
 // Import all needed files =============================================================================================
 import './prototypes/RoomVisual';
 import './prototypes/Room';
+import './prototypes/Creep';
 import { ErrorMapper } from 'utils/ErrorMapper';
 import { ROOM_STATISTICS, ROOM_EUCLID_DIST } from './settings';
 import { Console } from './console/Console'
@@ -46,6 +47,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
 		  Architect.run(room);                                  // Place construction sites
 		  Manager.init(room);                                   // Create request for undone work
 		  Supervisor.init(room);																// Assign requests to creeps/spawns/towers/etc.
+		  Supervisor.run(room);																	// Do the assigned requests
 		}
 
 		// Show room statistics --------------------------------------------------------------------------------------------

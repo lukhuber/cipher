@@ -6,6 +6,11 @@ interface Room {
 	getCreepsByRole(role: string): Creep[];
 }
 
+interface Creep {
+	harvestSource(): void;
+	fillSpawn(spawn: StructureSpawn): void;
+}
+
 type SinkUnit = 
 	| StructureSpawn
 	| StructureExtension

@@ -15,4 +15,5 @@ interface CreepMemory {
 	isIdle: boolean;
 	assignedMiningSite?: string;
 	assignedUpgradeSite?: string;
+	source?: Source | null;
 }

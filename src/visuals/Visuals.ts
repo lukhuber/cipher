@@ -77,11 +77,26 @@ export class Visuals {
 			font: FONTSIZE,
 			align: 'left',
 		};
-		const styleText: { opacity: number; font: number; align: 'center' | 'left' | 'right' | undefined } = {
+		const styleLabels: { opacity: number; font: number; align: 'center' | 'left' | 'right' | undefined } = {
 			opacity: OPACITY_TEXT,
 			font: FONTSIZE - 0.1,
 			align: 'left',
 		};
+		const styleValues: { opacity: number; font: number; align: 'center' | 'left' | 'right' | undefined } = {
+			opacity: OPACITY_TEXT,
+			font: FONTSIZE - 0.1,
+			align: 'right',
+		};
+
+		// Get current creep counts ----------------------------------------------------------------------------------------
+		const currentHarvesters: number = room.getCreepsByRole('harvester').length
+		const currentQueens: number = room.getCreepsByRole('queen').length
+		const currentUpgraders: number = room.getCreepsByRole('upgrader').length
+		const currentWorkers: number = room.getCreepsByRole('worker').length
+		const currentTransporters: number = room.getCreepsByRole('transporter').length
+
+		// Other needed values ---------------------------------------------------------------------------------------------
+		const neededHarvesters: number = room.find(FIND_SOURCES).length
 
 		// Draw the box for the creeps stats -------------------------------------------------------------------------------
 		const creepsStats: RoomVisual = new RoomVisual(room.name);
@@ -90,10 +105,18 @@ export class Visuals {
 
 		// Fill the box with labels (aka. text) ----------------------------------------------------------------------------
 		creepsStats.text(room.name + ' Creeps', pos.x + 0.2, pos.y + 0.75, styleHeading);
-		creepsStats.text('Queen', pos.x + 0.2, pos.y + 1.75, styleText);
-		creepsStats.text('Harvester', pos.x + 0.2, pos.y + 2.75, styleText);
-		creepsStats.text('Upgrader', pos.x + 0.2, pos.y + 3.75, styleText);
-		creepsStats.text('Worker', pos.x + 0.2, pos.y + 4.75, styleText);
-		creepsStats.text('Transporter', pos.x + 0.2, pos.y + 5.75, styleText);
+		creepsStats.text('Queen', pos.x + 0.2, pos.y + 1.75, styleLabels);
+		creepsStats.text('Harvester', pos.x + 0.2, pos.y + 2.75, styleLabels);
+		creepsStats.text('Upgrader', pos.x + 0.2, pos.y + 3.75, styleLabels);
+		creepsStats.text('Worker', pos.x + 0.2, pos.y + 4.75, styleLabels);
+		creepsStats.text('Transporter', pos.x + 0.2, pos.y + 5.75, styleLabels);
+
+		// Fill the box with current creep counts --------------------------------------------------------------------------
+		creepsStats.text(currentQueens.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 1.75, styleValues)
+		creepsStats.text(currentHarvesters.toString() + ' / ' + neededHarvesters.toString(), 
+										 pos.x + PANEL_WIDTH - 0.2, pos.y + 2.75, styleValues)
+		creepsStats.text(currentUpgraders.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 3.75, styleValues)
+		creepsStats.text(currentWorkers.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 4.75, styleValues)
+		creepsStats.text(currentTransporters.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 5.75, styleValues)
 	}
 }

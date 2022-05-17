@@ -40,7 +40,6 @@ export class Manager {
 
 				// Create request, if no harvester is spawning and no request is pending ---------------------------------------
 				if (harvesterRequests === 0 && harvesterSpawning === 0) {
-					console.log('Still trying to spawn harvesters');
 					const r: Request = new Request('spawn', 10, 'harvester');
 					room.memory.Requests.push(r);
 				}

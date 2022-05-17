@@ -10,11 +10,16 @@ export class Supervisor {
 		Supervisor.driveHarvesters(room); // Makes the harvesters go mining sources
 	}
 
-	private static doSpawnRequests(room: Room): void {
+	private static doSpawnRequests(room: Room): boolean {
 		const requests: Request[] = _.filter(
 			room.memory.Requests,
 			(r) => r.type === 'spawn'
 		);
+
+		if (requests.length === 0) {
+			return true
+		}
+
 		const storesAreFilled: boolean =
 			room.energyAvailable === room.energyCapacityAvailable;
 
@@ -36,6 +41,8 @@ export class Supervisor {
 			const index: number = room.memory.Requests.indexOf(nextTask);
 			room.memory.Requests.splice(index, 1);
 		}
+
+		return true
 	}
 
 	private static driveHarvesters(room: Room): void {

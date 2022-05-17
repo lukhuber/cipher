@@ -42,6 +42,10 @@ To compile and deploy the code use one of the following commands (depending on t
 
 - Assignment of `Tasks` to idle creeps
 - Independent mining and upgrade sites
+- Remote mining
+- Room scouting
+- Defensive capabilities (no specific plans yet)
+- Offensive capabilities (no specific plans yet)
 
 These feature are not in any particular order, but represent a simple TODO list for me
 

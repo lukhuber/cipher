@@ -11,7 +11,8 @@ interface FlagMemory {
 
 interface CreepMemory {
 	role: string;
-	home: string:
+	home: string;
+	isIdle: boolean;
 	assignedMiningSite?: string;
 	assignedUpgradeSite?: string;
 }

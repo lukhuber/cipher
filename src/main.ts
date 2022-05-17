@@ -24,6 +24,7 @@ import { Console } from './console/Console'
 import { Memory} from './memory/Memory';
 import { Architect } from './architect/Architect';
 import { Manager } from './manager/Manager';
+import { Supervisor } from './supervisor/Supervisor';
 import { Visuals } from './visuals/Visuals';
 // =====================================================================================================================
 
@@ -44,8 +45,9 @@ export const loop = ErrorMapper.wrapLoop(() => {
 		if (room.memory.isInitialized) {
 		  Architect.run(room);                                  // Place construction sites
 		  Manager.init(room);                                   // Create request for undone work
+		  Supervisor.init(room);																// Assign requests to creeps/spawns/towers/etc.
 		}
-		
+
 		// Show room statistics --------------------------------------------------------------------------------------------
 		if (ROOM_STATISTICS && Game.cpu.bucket > 9000) {
 			Visuals.displayStatistics(room);

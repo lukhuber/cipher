@@ -32,15 +32,16 @@ To compile and deploy the code use one of the following commands (depending on t
 - Statistics overview in each `room` using `RoomVisual` (very rudimentary
 - Automatic bunker planning and building
 - Modular approach to codebase
-  - `Architect` responsible for `room` initialization
+  - `Architect` responsible for `room` initialization and base planning
+  - `Manager` responsible for creation of `Requests`
 - Not so smart creep spawner
+- Various console commands
 
 ### Upcoming features
 
 - Assignment of `Tasks` to idle creeps
 - Independent mining and upgrade sites
 - Modular approach to codebase
-  - Implementation of `Manager`
   - Implementation of `Supervisor`
 
 These feature are not in any particular order, but represent a simple TODO list for me

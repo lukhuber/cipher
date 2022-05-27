@@ -4,6 +4,8 @@ interface RoomVisual {
 
 interface Room {
 	getCreepsByRole(role: string): Creep[];
+	getSpawnRequests(): SpawnRequest[];
+	getTransportRequests(): TransportRequest[];
 }
 
 interface Creep {
@@ -21,6 +23,6 @@ type SinkUnit =
 
 type StorageUnit = StructureContainer | StructureTerminal | StructureStorage;
 
-type RequestTypes = 'spawn' | 'build' | 'fill' | 'repair';
+type Request = SpawnRequest | TransportRequest;
 
 type Roles = 'harvester' | 'worker' | 'upgrader' | 'transporter' | 'queen';

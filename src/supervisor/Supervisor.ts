@@ -1,4 +1,4 @@
-import { Request } from '.././request/Request';
+import { SpawnRequest, TransportRequest } from '.././request/Request';
 import { getBodyParts, getNewCreepName } from '.././utils/utilsSpawner';
 
 export class Supervisor {
@@ -11,10 +11,7 @@ export class Supervisor {
 	}
 
 	private static doSpawnRequests(room: Room): boolean {
-		const requests: Request[] = _.filter(
-			room.memory.Requests,
-			(r) => r.type === 'spawn'
-		);
+		const requests: Request[] = room.getSpawnRequests()
 
 		if (requests.length === 0) {
 			return true

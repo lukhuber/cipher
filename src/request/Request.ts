@@ -1,13 +1,29 @@
-export class Request {
-	type: RequestTypes;
+export class SpawnRequest {
+	type: string;
 	priority: number;
-	role?: Roles;
-	target?: ConstructionSite | SinkUnit | StorageUnit;
-	
-	constructor(type: RequestTypes, priority: number, role?: Roles , target?: ConstructionSite | SinkUnit | StorageUnit) {
-		this.type = type;
+	role: Roles;
+
+	constructor(priority: number, role: Roles) {
+		this.type = 'spawn';
 		this.priority = priority;
-		this.role = role
-		this.target = target
+		this.role = role;
+	}
+}
+
+export class TransportRequest {
+	type: string;
+	priority: number;
+	target: ConstructionSite | SinkUnit | StorageUnit;
+	resourceType: ResourceConstant;
+
+	constructor(
+		priority: number,
+		target: ConstructionSite | SinkUnit | StorageUnit,
+		resourceType: ResourceConstant
+	) {
+		this.type = 'transport';
+		this.priority = priority;
+		this.target = target;
+		this.resourceType = resourceType;
 	}
 }

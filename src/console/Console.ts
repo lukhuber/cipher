@@ -1,4 +1,4 @@
-import { Request } from '.././request/Request';
+import { SpawnRequest, TransportRequest } from '.././request/Request';
 
 export class Console {
 	static init(): void {
@@ -52,7 +52,7 @@ export class Console {
 		if (roomName) {
 			let spawnRequests: Request[] = _.filter(
 				Game.rooms[roomName].memory.Requests,
-				(r) => r.type === 'spawn'
+				(r) => r instanceof SpawnRequest
 			);
 			spawnRequests = _.sortBy(spawnRequests, (r) => r.priority, 'desc');
 
@@ -77,7 +77,7 @@ export class Console {
 				const room = Game.rooms[r];
 				let spawnRequests: Request[] = _.filter(
 					room.memory.Requests,
-					(r) => r.type === 'spawn'
+					(r) => r instanceof SpawnRequest
 				);
 				spawnRequests = _.sortBy(spawnRequests, (r) => r.priority, 'desc');
 

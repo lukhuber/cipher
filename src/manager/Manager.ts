@@ -6,6 +6,7 @@ export class Manager {
 		Manager.monitorUpgradeSite(room); // Creates spawn requests for upgraders. Always just one
 		Manager.manageWorkerCount(room); // Creates spawn requests for workers, depending on available energy
 		Manager.createTransportRequests(room); // Creates transport requests to fill energy sinks/storages
+		Manager.updateTransportRequests(room); // Checks and adjusts existing transport requests
 	}
 
 	private static monitorMiningSites(room: Room): void {
@@ -162,6 +163,23 @@ export class Manager {
 
 				if (!existingRequests.some((r) => r.target.id === transportRequest.target.id)) {
 					room.memory.Requests.push(transportRequest);
+				}
+			}
+		}
+	}
+
+	private static updateTransportRequests(room: Room): void {
+		const existingRequests = room.getTransportRequests();
+
+		for (const r of existingRequests) {
+			const target = Game.getObjectById(r.target.id);
+
+			if(target instanceof StructureSpawn) {
+				const targetIsFull: boolean = target.store.getFreeCapacity(RESOURCE_ENERGY) === 0;
+
+				if (targetIsFull) {
+					const index = existingRequests.indexOf(r, 0);
+					room.memory.Requests.splice(index, 1)
 				}
 			}
 		}

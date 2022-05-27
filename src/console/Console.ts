@@ -30,7 +30,7 @@ export class Console {
 			}
 		}
 
-		return 'Error while trying to clear requests!'
+		return 'Error while trying to clear requests!';
 	}
 
 	static report(roomName?: string): string {
@@ -38,12 +38,14 @@ export class Console {
 		if (roomName) {
 			report += 'Report of all requests for room ' + roomName + '\n';
 			report += Console.reportSpawnRequests(roomName);
+			report += Console.reportTransportRequests(roomName);
 		} else {
 			report += 'Report of all requests for all rooms\n';
 			report += Console.reportSpawnRequests();
+			report += Console.reportTransportRequests();
 		}
 
-		return report
+		return report;
 	}
 
 	static reportSpawnRequests(roomName?: string): string {
@@ -51,46 +53,83 @@ export class Console {
 			'\n' + '\tSpawn requests\n' + '╔════════╤═════════════╤══════════╗\n' + '║ ROOM   │ ROLE        │ PRIORITY ║\n';
 
 		if (roomName) {
-			let spawnRequests: Request[] = _.filter(Game.rooms[roomName].memory.Requests, (r) => r.type === 'spawn');
+			let spawnRequests: Request[] = Game.rooms[roomName].getSpawnRequests();
 			spawnRequests = _.sortBy(spawnRequests, (r) => r.priority, 'desc');
 
 			for (const s of spawnRequests) {
-				if (typeof s.role === 'string') {
+				report +=
+					'║ ' +
+					roomName.padEnd(6, ' ') +
+					' │ ' +
+					s.role.padEnd(11, ' ') +
+					' │ ' +
+					s.priority.toString().padEnd(8, ' ') +
+					' ║\n';
+			}
+		} else {
+			for (const r in Game.rooms) {
+				const room = Game.rooms[r];
+				let spawnRequests: Request[] = room.getSpawnRequests();
+				spawnRequests = _.sortBy(spawnRequests, (r) => r.priority, 'desc');
+
+				for (const s of spawnRequests) {
 					report +=
 						'║ ' +
-						roomName.padEnd(6, ' ') +
+						room.name.padEnd(6, ' ') +
 						' │ ' +
 						s.role.padEnd(11, ' ') +
 						' │ ' +
 						s.priority.toString().padEnd(8, ' ') +
 						' ║\n';
-				} else {
-					throw new Error('Property "role" of spawn request is not type "string"!');
 				}
+			}
+		}
+		report += '╚════════╧═════════════╧══════════╝\n';
+		return report;
+	}
+
+	static reportTransportRequests(roomName?: string): string {
+		let report: string =
+			'\n' +
+			'\tTransport requests\n' +
+			'╔════════╤═════════════╤══════════╗\n' +
+			'║ ROOM   │ TARGET      │ PRIORITY ║\n';
+
+		if (roomName) {
+			let transportRequests: Request[] = Game.rooms[roomName].getTransportRequests();
+			transportRequests = _.sortBy(transportRequests, (r) => r.priority, 'desc');
+
+			for (const t of transportRequests) {
+				report += 
+				'║ ' + 
+				roomName.padEnd(6, ' ') + 
+				' │ ' + 
+				t.target.structureType.padEnd(11, ' ') + 
+				' │ ' + 
+				t.priority.toString().padEnd(8, ' ') + 
+				' ║\n';
 			}
 		} else {
 			for (const r in Game.rooms) {
 				const room = Game.rooms[r];
-				let spawnRequests: Request[] = _.filter(room.memory.Requests, (r) => r.type === 'spawn');
-				spawnRequests = _.sortBy(spawnRequests, (r) => r.priority, 'desc');
+				let transportRequests: Request[] = room.getTransportRequests();
+				transportRequests = _.sortBy(transportRequests, (r) => r.priority, 'desc');
 
-				for (const s of spawnRequests) {
-					if (typeof s.role === 'string') {
-						report +=
-							'║ ' +
-							room.name.padEnd(6, ' ') +
-							' │ ' +
-							s.role.padEnd(11, ' ') +
-							' │ ' +
-							s.priority.toString().padEnd(8, ' ') +
-							' ║\n';
-					} else {
-						throw new Error('Property "role" of spawn request is not type "string"!');
-					}
+				for (const t of transportRequests) {
+					report +=
+						'║ ' +
+						room.name.padEnd(6, ' ') +
+						' │ ' +
+						t.target.structureType.padEnd(11, ' ') +
+						' │ ' +
+						t.priority.toString().padEnd(8, ' ') +
+						' ║\n';
 				}
 			}
 		}
-		report += '╚════════╧═════════════╧══════════╝';
+
+		report += '╚════════╧═════════════╧══════════╝\n';
+
 		return report;
 	}
 }

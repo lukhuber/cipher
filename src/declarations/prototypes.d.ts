@@ -13,7 +13,7 @@ interface Creep {
 	fillSpawn(spawn: StructureSpawn): void;
 }
 
-type SinkUnit = 
+type SinkUnit =
 	| StructureSpawn
 	| StructureExtension
 	| StructureLab

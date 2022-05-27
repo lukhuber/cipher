@@ -11,14 +11,13 @@ export class Supervisor {
 	}
 
 	private static doSpawnRequests(room: Room): boolean {
-		const requests: Request[] = room.getSpawnRequests()
+		const requests: Request[] = room.getSpawnRequests();
 
 		if (requests.length === 0) {
-			return true
+			return true;
 		}
 
-		const storesAreFilled: boolean =
-			room.energyAvailable === room.energyCapacityAvailable;
+		const storesAreFilled: boolean = room.energyAvailable === room.energyCapacityAvailable;
 
 		if (storesAreFilled) {
 			const spawn: StructureSpawn = room.find(FIND_MY_SPAWNS)[0];
@@ -39,19 +38,15 @@ export class Supervisor {
 			room.memory.Requests.splice(index, 1);
 		}
 
-		return true
+		return true;
 	}
 
 	private static driveHarvesters(room: Room): void {
 		const harvesters: Creep[] = room.getCreepsByRole('harvester');
-		const workerIsAvailable: boolean =
-			room.getCreepsByRole('worker').length > 0;
+		const workerIsAvailable: boolean = room.getCreepsByRole('worker').length > 0;
 
 		for (const h of harvesters) {
-			if (
-				!workerIsAvailable &&
-				h.store.getFreeCapacity(RESOURCE_ENERGY) === 0
-			) {
+			if (!workerIsAvailable && h.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
 				const spawn = h.room.find(FIND_MY_SPAWNS, {
 					filter: (s) => {
 						return s.store.getFreeCapacity(RESOURCE_ENERGY) > 0;

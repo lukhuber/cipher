@@ -52,4 +52,3 @@ These feature are not in any particular order, but represent a simple TODO list 
 ### Known Bugs
 
 - Harvesters throw an error during their very first tick, as mining site is not yet assigned
-- Console commands should be designed, such as being return values, instead of writing to console directly

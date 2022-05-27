@@ -9,24 +9,17 @@ export class Manager {
 	}
 
 	private static monitorMiningSites(room: Room): void {
-		const flags: Flag[] = _.filter(Game.flags, (f) =>
-			f.name.includes(room.name + ' mining site')
-		);
+		const flags: Flag[] = _.filter(Game.flags, (f) => f.name.includes(room.name + ' mining site'));
 
 		// Cycle through all flags. Check if assigned harvester is still alive. Else create request. -----------------------
 		for (const f of flags) {
 			// Check if assigned harvester is dead or never existed (new room) -----------------------------------------------
 			// @ts-ignore: Object is possibly 'null'.
-			if (
-				f.memory.assignedHarvester === undefined ||
-				!Game.creeps[f.memory.assignedHarvester.name]
-			) {
+			if (f.memory.assignedHarvester === undefined || !Game.creeps[f.memory.assignedHarvester.name]) {
 				Game.flags[f.name].memory.assignedHarvester = undefined;
 
 				// Get spawn requests for harvesters. We don't want to create another one --------------------------------------
-				const harvesterRequests: number = room
-					.getSpawnRequests()
-					.filter((r) => r.role === 'harvester').length;
+				const harvesterRequests: number = room.getSpawnRequests().filter((r) => r.role === 'harvester').length;
 
 				// Get spawns spawning harvesters. We don't want to create a request, if a harvester is spawning ---------------
 				const spawns: StructureSpawn[] = room.find(FIND_MY_SPAWNS);
@@ -65,22 +58,15 @@ export class Manager {
 	}
 
 	private static monitorUpgradeSite(room: Room): void {
-		const f: Flag = _.filter(Game.flags, (f) =>
-			f.name.includes(room.name + ' upgrade site')
-		)[0];
+		const f: Flag = _.filter(Game.flags, (f) => f.name.includes(room.name + ' upgrade site'))[0];
 
 		// Check if assigned harvester is dead or never existed (new room) -------------------------------------------------
 		// @ts-ignore: Object is possibly 'null'.
-		if (
-			f.memory.assignedUpgrader === undefined ||
-			!Game.creeps[f.memory.assignedUpgrader.name]
-		) {
+		if (f.memory.assignedUpgrader === undefined || !Game.creeps[f.memory.assignedUpgrader.name]) {
 			Game.flags[f.name].memory.assignedUpgrader = undefined;
 
 			// Get spawn requests for upgraders. We don't want to create another one ----------------------------------------
-			const upgraderRequests: number = room
-				.getSpawnRequests()
-				.filter((r) => r.role === 'upgrader').length;
+			const upgraderRequests: number = room.getSpawnRequests().filter((r) => r.role === 'upgrader').length;
 
 			// Get spawns spawning upgraders. We don't want to create a request, if a harvester is spawning -----------------
 			const spawns: StructureSpawn[] = room.find(FIND_MY_SPAWNS);
@@ -95,7 +81,6 @@ export class Manager {
 			// Create request, if no upgrader is spawning and no request is pending -----------------------------------------
 			if (upgraderRequests === 0 && upgraderSpawning === 0) {
 				const spawnRequest: SpawnRequest = new SpawnRequest(6, 'upgrader');
-				console.log('creating spawn');
 				room.memory.Requests.push(spawnRequest);
 			}
 		}
@@ -109,9 +94,7 @@ export class Manager {
 			if (!creep.memory.assignedUpgradeSite) {
 				const flagFreeUpgradeSite = room.find(FIND_FLAGS, {
 					filter: (flag) => {
-						return (
-							!flag.memory.assignedUpgrader && flag.name.includes('upgrade')
-						);
+						return !flag.memory.assignedUpgrader && flag.name.includes('upgrade');
 					},
 				})[0];
 
@@ -126,9 +109,7 @@ export class Manager {
 
 		if (workerCount < 2) {
 			// Get spawn requests for workers. We don't want to create another one ----------------------------------------
-			const workerRequests: number = room
-				.getSpawnRequests()
-				.filter((r) => r.role === 'worker').length;
+			const workerRequests: number = room.getSpawnRequests().filter((r) => r.role === 'worker').length;
 
 			// Get spawns spawning workers. We don't want to create a request, if a workers is spawning -----------------
 			const spawns: StructureSpawn[] = room.find(FIND_MY_SPAWNS);
@@ -149,36 +130,39 @@ export class Manager {
 	}
 
 	private static createTransportRequests(room: Room): void {
-		const energyOnGround: Resource<ResourceConstant>[] = room.find(
-			FIND_DROPPED_RESOURCES,
-			{ filter: (r) => r.resourceType === RESOURCE_ENERGY }
-		);
+		const existingRequests = room.getTransportRequests();
 
+		// Check if spawns need to be filled -------------------------------------------------------------------------------
 		const spawns: StructureSpawn[] = room.find(FIND_MY_STRUCTURES, {
 			filter: (s) => s.structureType === STRUCTURE_SPAWN,
 		});
 
-		// Check if spawns need to be filled -------------------------------------------------------------------------------
 		for (const s of spawns) {
-			const spawnIsFull: boolean =
-				s.store.getFreeCapacity(RESOURCE_ENERGY) === 0;
+			const spawnIsFull: boolean = s.store.getFreeCapacity(RESOURCE_ENERGY) === 0;
 
 			if (!spawnIsFull) {
-				const transportRequest: TransportRequest = new TransportRequest(
-					10,
-					s,
-					RESOURCE_ENERGY
-				);
+				const transportRequest: TransportRequest = new TransportRequest(10, s, RESOURCE_ENERGY);
 
-				const requests = room.getTransportRequests();
-
-				if (!requests.some((r) => r.target.id === transportRequest.target.id)) {
+				if (!existingRequests.some((r) => r.target.id === transportRequest.target.id)) {
 					room.memory.Requests.push(transportRequest);
 				}
+			}
+		}
 
-				// TODO: Letzter Implementation von mir war: Transportrequests für Spawns werden korrekt erstellt. Jetzt
-				// müssen sie noch abgearbeitet werden. Also beim Supervisor den Request in einen Task umwandeln und
-				// einem Creep zuweisen.
+		// Check if extensions need to be filled ---------------------------------------------------------------------------
+		const extensions: StructureExtension[] = room.find(FIND_MY_STRUCTURES, {
+			filter: (e) => e.structureType === STRUCTURE_EXTENSION,
+		});
+
+		for (const e of extensions) {
+			const extensionIsFull: boolean = e.store.getFreeCapacity(RESOURCE_ENERGY) === 0;
+
+			if (!extensionIsFull) {
+				const transportRequest: TransportRequest = new TransportRequest(9, e, RESOURCE_ENERGY);
+
+				if (!existingRequests.some((r) => r.target.id === transportRequest.target.id)) {
+					room.memory.Requests.push(transportRequest);
+				}
 			}
 		}
 	}

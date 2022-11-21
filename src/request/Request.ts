@@ -27,3 +27,15 @@ export class TransportRequest {
 		this.resourceType = resourceType;
 	}
 }
+
+export class RefuelRequest {
+	type: string;
+	creepName: string;
+	amount: number;
+
+	constructor(creepName: string, amount: number) {
+		this.type = 'spawn';
+		this.creepName = creepName;
+		this.amount = amount;
+	}
+}

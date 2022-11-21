@@ -24,3 +24,7 @@ Creep.prototype.fillSpawn = function (spawn: StructureSpawn): void {
 		this.moveTo(spawn, { visualizePathStyle: {} });
 	}
 };
+
+Creep.prototype.getEnergy = function(target: StructureStorage | StructureContainer | Resource): void {
+	
+}

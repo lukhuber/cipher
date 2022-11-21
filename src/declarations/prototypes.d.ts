@@ -11,6 +11,7 @@ interface Room {
 interface Creep {
 	harvestSource(): void;
 	fillSpawn(spawn: StructureSpawn): void;
+	getEnergy(target: StructureStorage | StructureContainer | Resource): void;
 }
 
 type SinkUnit =
@@ -21,8 +22,19 @@ type SinkUnit =
 	| StructureNuker
 	| StructureTower;
 
-type StorageUnit = StructureContainer | StructureTerminal | StructureStorage;
+type StorageUnit = 
+	| StructureContainer 
+	| StructureTerminal 
+	| StructureStorage;
 
-type Request = SpawnRequest | TransportRequest;
+type Request = 
+	| SpawnRequest
+	| TransportRequest
+	| RefuelRequest;
 
-type Roles = 'harvester' | 'worker' | 'upgrader' | 'transporter' | 'queen';
+type Roles = 
+	| 'harvester' 
+	| 'worker' 
+	| 'upgrader' 
+	| 'transporter' 
+	| 'queen';

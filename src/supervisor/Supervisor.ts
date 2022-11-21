@@ -3,11 +3,12 @@ import { getBodyParts, getNewCreepName } from '.././utils/utilsSpawner';
 
 export class Supervisor {
 	static init(room: Room): void {
-		Supervisor.doSpawnRequests(room); // This should be maybe put somewhere else. Maybe Supervisor.run()?
+		Supervisor.doSpawnRequests(room); 	// This should be maybe put somewhere else. Maybe Supervisor.run()?
 	}
 
 	static run(room: Room): void {
-		Supervisor.driveHarvesters(room); // Makes the harvesters go mining sources
+		Supervisor.driveHarvesters(room); 	// Makes the harvesters go mining sources
+		Supervisor.driveUpgraders(room);	// Makes the upgrader go upgrade the controller
 	}
 
 	private static doSpawnRequests(room: Room) {
@@ -45,7 +46,6 @@ export class Supervisor {
 		const harvesters: Creep[] = room.getCreepsByRole('harvester');
 		const workerIsAvailable: boolean = room.getCreepsByRole('worker').length > 0;
 
-
 		for (const h of harvesters) {
 			// When no worker is available, fill spawn when creep is full ---------------------------------------------
 			if (!workerIsAvailable && h.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
@@ -60,6 +60,14 @@ export class Supervisor {
 
 			h.harvestSource();
 			h.memory.isIdle = false;
+		}
+	}
+
+	private static driveUpgraders(room: Room): void {
+		const upgraders: Creep[] = room.getCreepsByRole('upgrader');
+		const harvesters: Creep[] = room.getCreepsByRole('harvester');
+
+		for (const c of upgraders) {
 		}
 	}
 }

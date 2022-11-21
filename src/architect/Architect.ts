@@ -31,7 +31,7 @@ export class Architect {
 		let indexX: number = 0;
 		let indexY: number = 0;
 
-		// Find the biggest number in the 2D array... ------------------------------------------------------------------
+		// Find the biggest number in the 2D array... -----------------------------------------------------------------
 		for (let x = 0; x < 50; x++) {
 			const max: number = Math.max(...euclideanDistance[x]);
 
@@ -42,7 +42,7 @@ export class Architect {
 			}
 		}
 
-		// ... and place the bunker anchor (flag) there ----------------------------------------------------------------
+		// ... and place the bunker anchor (flag) there ---------------------------------------------------------------
 		const flagPos: RoomPosition = new RoomPosition(indexX, indexY, room.name);
 		flagPos.createFlag(room.name);
 	}

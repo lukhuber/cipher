@@ -1,12 +1,12 @@
 function getHarvesterParts(room: Room): BodyPartConstant[] {
 	const workerIsAvailable: boolean = room.getCreepsByRole('worker').length < 0
 
-	// When no worker is in the room, the harvester must haul energy to spawn --------------------------------------------
+	// When no worker is in the room, the harvester must haul energy to spawn -------------------------------------------
 	if(!workerIsAvailable) {
 		return [WORK, CARRY, MOVE, MOVE]
 	}
 
-	// Else cram up to 5 WORK (priority!) and up to 5 MOVE into the harvester --------------------------------------------
+	// Else cram up to 5 WORK (priority!) and up to 5 MOVE into the harvester -------------------------------------------
 	let energyAvailable: number = room.energyAvailable
 
 	let workPossible: number = Math.floor(energyAvailable / 100) 						// This much WORK are possible
@@ -19,7 +19,7 @@ function getHarvesterParts(room: Room): BodyPartConstant[] {
 	let movePossible: number = Math.floor(energyAvailable / 100)						// This much MOVE are possible
 	movePossible = movePossible > 5 ? 5 : movePossible											// We only want max. 5 MOVE
 
-	// Prepare array to return -------------------------------------------------------------------------------------------
+	// Prepare array to return ------------------------------------------------------------------------------------------
 	const parts: BodyPartConstant[] = []
 
 	for (let i = 0; i < workPossible; i++) {																// Add WORK to parts array

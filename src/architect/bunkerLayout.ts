@@ -1,7 +1,7 @@
 type pos = { x: number; y: number };
 
 export function updateBunkerRCL2(room: Room, anchorPos: RoomPosition): void {
-  // Coordinates for buildings in relation to the bunker anchor --------------------------------------------------------
+  // Coordinates for buildings in relation to the bunker anchor -------------------------------------------------------
   const extensions: pos[] = [
 		{ x: -1, y: -2 },
 		{ x: -2, y: -2 },
@@ -10,7 +10,7 @@ export function updateBunkerRCL2(room: Room, anchorPos: RoomPosition): void {
 		{ x: -3, y: -3 },
   ];
 
-  // Place all construction sites. Existing buildings will be automatically skipped ------------------------------------
+  // Place all construction sites. Existing buildings will be automatically skipped -----------------------------------
   for (const e of extensions) {
 		room.createConstructionSite(
 		  anchorPos.x + e.x,
@@ -21,7 +21,7 @@ export function updateBunkerRCL2(room: Room, anchorPos: RoomPosition): void {
 }
 
 export function updateBunkerRCL3(room: Room, anchorPos: RoomPosition): void {
-  // Coordinates for buildings in relation to the bunker anchor --------------------------------------------------------
+  // Coordinates for buildings in relation to the bunker anchor -------------------------------------------------------
   const tower: pos = { x: 0, y: -1 };
   const extensions: pos[] = [
 		{ x: +3, y: -1 },
@@ -31,7 +31,7 @@ export function updateBunkerRCL3(room: Room, anchorPos: RoomPosition): void {
 		{ x: +3, y: -3 },
   ];
 
-  // Place all construction sites. Existing buildings will be automatically skipped ------------------------------------
+  // Place all construction sites. Existing buildings will be automatically skipped -----------------------------------
   for (const e of extensions) {
 		room.createConstructionSite(
 		  anchorPos.x + e.x,
@@ -47,7 +47,7 @@ export function updateBunkerRCL3(room: Room, anchorPos: RoomPosition): void {
 }
 
 export function updateBunkerRCL4(room: Room, anchorPos: RoomPosition): void {
-  // Coordinates for buildings in relation to the bunker anchor --------------------------------------------------------
+  // Coordinates for buildings in relation to the bunker anchor -------------------------------------------------------
   const storage: pos = { x: 0, y: 0 };
   const extensions: pos[] = [
 		{ x: -2, y: -3 },
@@ -62,7 +62,7 @@ export function updateBunkerRCL4(room: Room, anchorPos: RoomPosition): void {
 		{ x: 0, y: -5 },
   ];
 
-  // Place all construction sites. Existing buildings will be automatically skipped ------------------------------------
+  // Place all construction sites. Existing buildings will be automatically skipped -----------------------------------
   for (const e of extensions) {
 		room.createConstructionSite(
 		  anchorPos.x + e.x,
@@ -78,7 +78,7 @@ export function updateBunkerRCL4(room: Room, anchorPos: RoomPosition): void {
 }
 
 export function updateBunkerRCL5(room: Room, anchorPos: RoomPosition): void {
-  // Coordinates for buildings in relation to the bunker anchor --------------------------------------------------------
+  // Coordinates for buildings in relation to the bunker anchor -------------------------------------------------------
   const tower: pos = { x: 0, y: +1 };
   const extensions: pos[] = [
 		{ x: -4, y: 0 },
@@ -93,7 +93,7 @@ export function updateBunkerRCL5(room: Room, anchorPos: RoomPosition): void {
 		{ x: -3, y: -5 },
   ];
 
-  // Place all construction sites. Existing buildings will be automatically skipped ------------------------------------
+  // Place all construction sites. Existing buildings will be automatically skipped -----------------------------------
   for (let e of extensions) {
 		room.createConstructionSite(
 		  anchorPos.x + e.x,
@@ -109,7 +109,7 @@ export function updateBunkerRCL5(room: Room, anchorPos: RoomPosition): void {
 }
 
 export function updateBunkerRCL6(room: Room, anchorPos: RoomPosition): void {
-  // Coordinates for buildings in relation to the bunker anchor --------------------------------------------------------
+  // Coordinates for buildings in relation to the bunker anchor -------------------------------------------------------
   const extensions: pos[] = [
 		{ x: +4, y: 0 },
 		{ x: +5, y: 0 },
@@ -123,7 +123,7 @@ export function updateBunkerRCL6(room: Room, anchorPos: RoomPosition): void {
 		{ x: +3, y: -5 },
   ];
 
-  // Place all construction sites. Existing buildings will be automatically skipped ------------------------------------
+  // Place all construction sites. Existing buildings will be automatically skipped -----------------------------------
   for (const e of extensions) {
 		room.createConstructionSite(
 		  anchorPos.x + e.x,
@@ -134,7 +134,7 @@ export function updateBunkerRCL6(room: Room, anchorPos: RoomPosition): void {
 }
 
 export function updateBunkerRCL7(room: Room, anchorPos: RoomPosition): void {
-  // Coordinates for buildings in relation to the bunker anchor --------------------------------------------------------
+  // Coordinates for buildings in relation to the bunker anchor -------------------------------------------------------
   const tower: pos = { x: -1, y: 0 };
   const extensions: pos[] = [
 		{ x: -5, y: +3 },
@@ -149,7 +149,7 @@ export function updateBunkerRCL7(room: Room, anchorPos: RoomPosition): void {
 		{ x: +2, y: -6 },
   ];
 
-  // Place all construction sites. Existing buildings will be automatically skipped ------------------------------------
+  // Place all construction sites. Existing buildings will be automatically skipped -----------------------------------
   for (const e of extensions) {
 		room.createConstructionSite(
 		  anchorPos.x + e.x,
@@ -165,7 +165,7 @@ export function updateBunkerRCL7(room: Room, anchorPos: RoomPosition): void {
 }
 
 export function updateBunkerRCL8(room: Room, anchorPos: RoomPosition): void {
-  // Coordinates for buildings in relation to the bunker anchor --------------------------------------------------------
+  // Coordinates for buildings in relation to the bunker anchor -------------------------------------------------------
   const towers: pos[] = [
 		{ x: +1, y: 0 },
 		{ x: -1, y: -1 },
@@ -184,7 +184,7 @@ export function updateBunkerRCL8(room: Room, anchorPos: RoomPosition): void {
 		{ x: +2, y: +6 },
   ];
 
-  // Place all construction sites. Existing buildings will be automatically skipped ------------------------------------
+  // Place all construction sites. Existing buildings will be automatically skipped -----------------------------------
   for (const e of extensions) {
 		room.createConstructionSite(
 		  anchorPos.x + e.x,

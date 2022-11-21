@@ -10,13 +10,15 @@ export class Supervisor {
 		Supervisor.driveHarvesters(room); // Makes the harvesters go mining sources
 	}
 
-	private static doSpawnRequests(room: Room): boolean {
+	private static doSpawnRequests(room: Room) {
 		const requests: Request[] = room.getSpawnRequests();
 
+		// Nothing to do, when no requests are existing ---------------------------------------------------------------
 		if (requests.length === 0) {
-			return true;
+			return;
 		}
 
+		// If spawn + all extensions are filled, process the next spawnRequest ----------------------------------------
 		const storesAreFilled: boolean = room.energyAvailable === room.energyCapacityAvailable;
 
 		if (storesAreFilled) {
@@ -33,19 +35,19 @@ export class Supervisor {
 				memory: { role: role, home: room.name, isIdle: true },
 			});
 
-			// Now delete the processed spawn request ------------------------------------------------------------------------
+			// Now delete the processed spawn request -----------------------------------------------------------------
 			const index: number = room.memory.Requests.indexOf(nextTask);
 			room.memory.Requests.splice(index, 1);
 		}
-
-		return true;
 	}
 
 	private static driveHarvesters(room: Room): void {
 		const harvesters: Creep[] = room.getCreepsByRole('harvester');
 		const workerIsAvailable: boolean = room.getCreepsByRole('worker').length > 0;
 
+
 		for (const h of harvesters) {
+			// When no worker is available, fill spawn when creep is full ---------------------------------------------
 			if (!workerIsAvailable && h.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
 				const spawn = h.room.find(FIND_MY_SPAWNS, {
 					filter: (s) => {

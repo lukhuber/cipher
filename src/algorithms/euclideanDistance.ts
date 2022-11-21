@@ -7,11 +7,11 @@ function create2DArray(width: number, height: number, content?: number): number[
 }
 
 export function calcEuclideanDistance(room: Room): number[][] {
-	// Prepare variables for algorithm -----------------------------------------------------------------------------------
+	// Prepare variables for algorithm --------------------------------------------------------------------------------
 	const terrain: RoomTerrain = new Room.Terrain(room.name);
 	const euclideanDistance: number[][] = create2DArray(50, 50, 0);
 
-	// First iteration through room, from top left to lower right --------------------------------------------------------
+	// First iteration through room, from top left to lower right -----------------------------------------------------
 	for (let x = 1; x < 49; x++) {
 		for (let y = 1; y < 49; y++) {
 			if (terrain.get(x, y) === 0) {
@@ -26,7 +26,7 @@ export function calcEuclideanDistance(room: Room): number[][] {
 		}
 	}
 
-	// Second iteration through room, from lower right to top left -------------------------------------------------------
+	// Second iteration through room, from lower right to top left ----------------------------------------------------
 	for (let x = 48; x > 0; x--) {
 		for (let y = 48; y > 0; y--) {
 			if (terrain.get(x, y) === 0) {
@@ -48,7 +48,7 @@ export function calcEuclideanDistance(room: Room): number[][] {
 		}
 	}
 
-	// Third iteration through room, from top left to lower right -------------------------------------------------------
+	// Third iteration through room, from top left to lower right -----------------------------------------------------
 	for (let y = 1; y > 49; y++) {
 		for (let x = 1; x > 49; x++) {
 			if (terrain.get(x, y) === 0) {
@@ -70,7 +70,7 @@ export function calcEuclideanDistance(room: Room): number[][] {
 		}
 	}
 
-	// Fourth iteration through room, from lower right to top left -------------------------------------------------------
+	// Fourth iteration through room, from lower right to top left ----------------------------------------------------
 	for (let y = 48; y > 0; y--) {
 		for (let x = 48; x > 0; x--) {
 			if (terrain.get(x, y) === 0) {

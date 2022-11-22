@@ -6,6 +6,7 @@ interface Room {
 	getCreepsByRole(role: string): Creep[];
 	getSpawnRequests(): SpawnRequest[];
 	getTransportRequests(): TransportRequest[];
+	getRefuelStation(): Structure | undefined;
 }
 
 interface Creep {

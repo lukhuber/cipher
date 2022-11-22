@@ -4,6 +4,7 @@ import { getBodyParts, getNewCreepName } from '.././utils/utilsSpawner';
 export class Supervisor {
 	static init(room: Room): void {
 		Supervisor.doSpawnRequests(room); 	// This should be maybe put somewhere else. Maybe Supervisor.run()?
+		Supervisor.refuelCreeps(room);		// Assign RefuelTask to empty Creeps
 	}
 
 	static run(room: Room): void {
@@ -68,6 +69,25 @@ export class Supervisor {
 		const harvesters: Creep[] = room.getCreepsByRole('harvester');
 
 		for (const c of upgraders) {
+		}
+	}
+
+	private static refuelCreeps(room: Room): void {
+		const upgraders: Creep[] = room.getCreepsByRole('upgrader');
+		const workers: Creep[] = room.getCreepsByRole('worker');
+
+		const creeps: Creep[] = upgraders.concat(workers);
+
+		for (const c of creeps) {
+			if (c.store.getUsedCapacity() === 0) {
+				const refuelStation: Structure | undefined = room.getRefuelStation();
+
+				if (refuelStation) {
+					console.log("foo")
+				} else {
+					console.log("bar")
+				}
+			}
 		}
 	}
 }

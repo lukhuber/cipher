@@ -28,3 +28,4 @@ Creep.prototype.fillSpawn = function (spawn: StructureSpawn): void {
 Creep.prototype.getEnergy = function(target: StructureStorage | StructureContainer | Resource): void {
 	
 }
+

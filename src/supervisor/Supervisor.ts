@@ -1,15 +1,17 @@
+import { RefuelTask } from '.././task/Task';
+import { runRefuel } from '.././task/Tasks';
 import { SpawnRequest, TransportRequest } from '.././request/Request';
 import { getBodyParts, getNewCreepName } from '.././utils/utilsSpawner';
 
 export class Supervisor {
 	static init(room: Room): void {
-		Supervisor.doSpawnRequests(room); 	// This should be maybe put somewhere else. Maybe Supervisor.run()?
-		Supervisor.refuelCreeps(room);		// Assign RefuelTask to empty Creeps
+		Supervisor.assignRefuelTask(room);	// Assign RefuelTask to empty Creeps
 	}
 
 	static run(room: Room): void {
+		Supervisor.doSpawnRequests(room);	// Execute pending SpawnRequests from Manager
 		Supervisor.driveHarvesters(room); 	// Makes the harvesters go mining sources
-		Supervisor.driveUpgraders(room);	// Makes the upgrader go upgrade the controller
+		Supervisor.runTasks(room);			// Cycles through all creeps of this room and run their tasks
 	}
 
 	private static doSpawnRequests(room: Room) {
@@ -64,29 +66,26 @@ export class Supervisor {
 		}
 	}
 
-	private static driveUpgraders(room: Room): void {
-		const upgraders: Creep[] = room.getCreepsByRole('upgrader');
-		const harvesters: Creep[] = room.getCreepsByRole('harvester');
-
-		for (const c of upgraders) {
-		}
-	}
-
-	private static refuelCreeps(room: Room): void {
+	private static assignRefuelTask(room: Room): void {
 		const upgraders: Creep[] = room.getCreepsByRole('upgrader');
 		const workers: Creep[] = room.getCreepsByRole('worker');
 
 		const creeps: Creep[] = upgraders.concat(workers);
 
 		for (const c of creeps) {
-			if (c.store.getUsedCapacity() === 0) {
-				const refuelStation: Structure | undefined = room.getRefuelStation();
+			if (c.memory.isIdle && c.store.getUsedCapacity() === 0) {
+				const rTask: RefuelTask = new RefuelTask(c.name);
+				room.memory.Tasks.push(rTask);
+			}
+		}
+	}
 
-				if (refuelStation) {
-					console.log("foo")
-				} else {
-					console.log("bar")
-				}
+	private static runTasks(room: Room): void {
+		const tasks: Task[] = room.memory.Tasks;
+
+		for (const task of tasks) {
+			if (task.type === 'refuel') {
+				runRefuel(task);
 			}
 		}
 	}

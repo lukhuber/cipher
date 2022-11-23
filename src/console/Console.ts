@@ -3,8 +3,9 @@ import { SpawnRequest, TransportRequest } from '.././request/Request';
 export class Console {
 	static init(): void {
 		global.help = this.help;
-		global.clearAllRequests = this.clearAllRequests;
 		global.report = this.report;
+		global.clearAllRequests = this.clearAllRequests;
+		global.clearAllTasks = this.clearAllTasks;
 	}
 
 	static help(): string {
@@ -15,6 +16,7 @@ export class Console {
 		helpMessage += 'help()                        This Message\n';
 		helpMessage += 'report(roomName?)             Creates a report of all requests (in a room)\n';
 		helpMessage += 'clearAllRequests(roomName?)   Deletes all requests (in a room)\n';
+		helpMessage += 'clearAllTasks(roomName?)	  Deletes all tasks (in a room) and sets affected creeps to idle\n';
 
 		return helpMessage;
 	}
@@ -31,6 +33,31 @@ export class Console {
 		}
 
 		return 'Error while trying to clear requests!';
+	}
+
+	static clearAllTasks(roomName?: string): string {
+		if (roomName) {
+			// Set all creeps of this room to idle --------------------------------------------------------------------
+			const creeps: Creep[] = Game.rooms[roomName].getCreeps();
+			for (const c of creeps) {
+				c.memory.isIdle = true
+			}
+
+			// Reset Task array ---------------------------------------------------------------------------------------
+			Game.rooms[roomName].memory.Tasks = new Array<Task>();
+			return 'Cleared all tasks of room ' + roomName;
+		} else {
+			for (const r in Game.rooms) {
+				const creeps: Creep[] = Game.rooms[r].getCreeps();
+				for (const c of creeps) {
+					c.memory.isIdle = true
+				}
+				Game.rooms[r].memory.Tasks = new Array<Task>();
+				return 'Cleared all tasks in all rooms';
+			}
+		}
+
+		return 'Error while trying to clear tasks!'
 	}
 
 	static report(roomName?: string): string {

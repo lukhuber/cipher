@@ -2,6 +2,7 @@ interface RoomMemory {
 	isInitialized: boolean;
 	euclideanDistance: number[][]:
 	Requests: Request[]
+	Tasks: Task[]
 }
 
 interface FlagMemory {

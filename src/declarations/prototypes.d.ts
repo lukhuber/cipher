@@ -4,9 +4,11 @@ interface RoomVisual {
 
 interface Room {
 	getCreepsByRole(role: string): Creep[];
+	getCreeps(): Creep[];
 	getSpawnRequests(): SpawnRequest[];
 	getTransportRequests(): TransportRequest[];
-	getRefuelStation(): Structure | undefined;
+	getRefuelStation(): string | undefined;
+	getDroppedEnergy(): string | undefinded;
 }
 
 interface Creep {
@@ -32,6 +34,9 @@ type Request =
 	| SpawnRequest
 	| TransportRequest
 	| RefuelRequest;
+
+type Task =
+	| RefuelTask;
 
 type Roles = 
 	| 'harvester' 

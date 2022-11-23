@@ -7,6 +7,8 @@ interface Room {
 	getCreeps(): Creep[];
 	getSpawnRequests(): SpawnRequest[];
 	getTransportRequests(): TransportRequest[];
+	getTasks(): Task[];
+	getNumberOfTasksByType(type: string): number;
 	getRefuelStation(): string | undefined;
 	getDroppedEnergy(): string | undefinded;
 }
@@ -36,7 +38,8 @@ type Request =
 	| RefuelRequest;
 
 type Task =
-	| RefuelTask;
+	| RefuelTask
+	| UpgradeTask;
 
 type Roles = 
 	| 'harvester' 

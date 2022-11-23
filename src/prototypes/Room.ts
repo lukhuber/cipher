@@ -20,6 +20,10 @@ Room.prototype.getTasks = function (): Task[] {
   return this.memory.Tasks;
 }
 
+Room.prototype.getNumberOfTasksByType = function(type: string): number {
+  return _.filter(this.memory.Tasks, (r) => r.type === type).length;
+}
+
 Room.prototype.getRefuelStation = function(): string | undefined {
   const storage: StructureStorage[] = this.find(FIND_MY_STRUCTURES, {filter: { structureType: STRUCTURE_STORAGE }}) as unknown as StructureStorage[];
   const containers: StructureContainer[] = this.find(FIND_MY_STRUCTURES, {filter: { structureType: STRUCTURE_CONTAINER }}) as unknown as StructureContainer[];

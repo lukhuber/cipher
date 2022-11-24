@@ -3,9 +3,10 @@ import { runRefuel, runUpgrade } from '.././task/Tasks';
 import { SpawnRequest, TransportRequest } from '.././request/Request';
 import { getBodyParts, getNewCreepName } from '.././utils/utilsSpawner';
 
+// The Supervisor converts Requests to Tasks and assigns the to creeps ################################################
 export class Supervisor {
 	static init(room: Room): void {
-		Supervisor.validateTasks(room);		// Check if Tasks are still fullfillable
+		Supervisor.validateTasks(room);		// Check if Tasks are still fullfillable. Creep could have died already
 		Supervisor.assignRefuelTask(room);	// Assign RefuelTask to empty Creeps
 		Supervisor.assignUpgradeTask(room); // Assign UpgradeTask to upgraders (always) and workers (if no other tasks are pending)
 	}

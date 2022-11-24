@@ -9,21 +9,25 @@ import {
 	updateBunkerRCL8
 } from './bunkerLayout';
 
+// The Architect prepares each room in terms of bunker placement, roads and other buildings ###########################
 export class Architect {
+	// This function is call for all uninitialized rooms ==============================================================
 	static init(room: Room): void {
-		room.memory.euclideanDistance = calcEuclideanDistance(room);
+		room.memory.euclideanDistance = calcEuclideanDistance(room);		// Save euclidDist for this room 
 
-		Architect.placeBunkerAnchor(room);
-		Architect.placeMiningSiteAnchors(room);
-		Architect.placeUpgradeSiteAnchor(room);
+		Architect.placeBunkerAnchor(room);									// Places the bunker anchor at best pos
+		Architect.placeMiningSiteAnchors(room);								// Anchors for mining site containers
+		Architect.placeUpgradeSiteAnchor(room);								// Anchors for upgrade site container
 
 		room.memory.isInitialized = true;
 	}
 
+	// This function is only call for initialized rooms ===============================================================
 	static run(room: Room): void {
-		Architect.updateBunker(room);
+		Architect.updateBunker(room);				// Checks controller level and updates bunker accordingly
 	}
 
+	// Places bunker anchor furthest away from walls. Bunker needs at least 7 blocks space in each direction ==========
 	private static placeBunkerAnchor(room: Room): void {
 		const euclideanDistance: number[][] = room.memory.euclideanDistance;
 
@@ -47,6 +51,7 @@ export class Architect {
 		flagPos.createFlag(room.name);
 	}
 
+	// Places mining site anchor right beside each source =============================================================
 	private static placeMiningSiteAnchors(room: Room): void {
 		const sources: Source[] = room.find(FIND_SOURCES);
 
@@ -61,6 +66,7 @@ export class Architect {
 		}
 	}
 
+	// Places upgrade site anchor a bit away from controller for more space ===========================================
 	private static placeUpgradeSiteAnchor(room: Room): void {
 		const controller: StructureController | undefined = room.controller;
 
@@ -74,6 +80,7 @@ export class Architect {
 		}
 	}
 
+	// Compares current construction sites and buildings to blueprint and places new construction sites ===============
 	private static updateBunker(room: Room): void {
 		// @ts-ignore: Object is possibly 'null'.
 		const roomLevel: number | undefined = room.controller.level;

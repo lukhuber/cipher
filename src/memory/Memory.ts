@@ -1,6 +1,7 @@
 export class Memory {
+	// Prepares the memory of uninitialized rooms =====================================================================
 	static init(room: Room): void {
-		room.memory.Requests = new Array<Request>();
-		room.memory.Tasks = new Array<Task>();
+		room.memory.Requests = new Array<Request>();	// Array used to store all requests of this room
+		room.memory.Tasks = new Array<Task>();			// Array used to store all tasks of this room
 	}
 }

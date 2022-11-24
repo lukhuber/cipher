@@ -1,14 +1,17 @@
 import { SpawnRequest, TransportRequest } from '.././request/Request';
 
+// The Manager is responsible for creating all requests, which the Supervisor will then assign to creeps ##############
 export class Manager {
+	// This function combines all other functions assessing the current state of the room and creating requests =======
 	static init(room: Room): void {
-		Manager.monitorMiningSites(room); // Creates spawn requests for harvesters. One for each source
-		Manager.monitorUpgradeSite(room); // Creates spawn requests for upgraders. Always just one
-		Manager.manageWorkerCount(room); // Creates spawn requests for workers, depending on available energy
-		Manager.createTransportRequests(room); // Creates transport requests to fill energy sinks/storages
-		Manager.updateTransportRequests(room); // Checks and adjusts existing transport requests
+		Manager.monitorMiningSites(room);			// Makes sure, that each source has a Harvester
+		Manager.monitorUpgradeSite(room);			// Makes sure, that one Upgrader is always available
+		Manager.manageWorkerCount(room);			// Creates spawn requests for workers, depending on available energy
+		Manager.createTransportRequests(room);		// Creates transport requests to fill energy sinks/storages
+		Manager.updateTransportRequests(room);		// Checks and adjusts existing transport requests
 	}
 
+	// Check if the assigned Harvester is (still) alive and creates a SpawnRequest if not =============================
 	private static monitorMiningSites(room: Room): void {
 		const flags: Flag[] = _.filter(Game.flags, (f) => f.name.includes(room.name + ' mining site'));
 
@@ -58,6 +61,7 @@ export class Manager {
 		}
 	}
 
+	// Check if at least one Upgrader is (still) alive and creates a SpawnRequest if not ==============================
 	private static monitorUpgradeSite(room: Room): void {
 		const f: Flag = _.filter(Game.flags, (f) => f.name.includes(room.name + ' upgrade site'))[0];
 
@@ -105,6 +109,7 @@ export class Manager {
 		}
 	}
 
+	// Very rudimentary system to always have two workers. Will be replaced with a much smarter solution :) ===========
 	private static manageWorkerCount(room: Room): void {
 		const workerCount: number = room.getCreepsByRole('worker').length;
 
@@ -130,6 +135,7 @@ export class Manager {
 		}
 	}
 
+	// If a energy sink/storage has no request yet, but needs energy, this function will create a TransportRequest ====
 	private static createTransportRequests(room: Room): void {
 		const existingRequests = room.getTransportRequests();
 
@@ -168,6 +174,7 @@ export class Manager {
 		}
 	}
 
+	// Updating existing TransportRequests. A creep could have died while hauling =====================================
 	private static updateTransportRequests(room: Room): void {
 		const existingRequests = room.getTransportRequests();
 

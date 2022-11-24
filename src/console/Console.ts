@@ -1,6 +1,7 @@
 import { SpawnRequest, TransportRequest } from '.././request/Request';
 
 export class Console {
+	// Provides the commands to the game console ======================================================================
 	static init(): void {
 		global.help = this.help;
 		global.report = this.report;
@@ -8,10 +9,11 @@ export class Console {
 		global.clearAllTasks = this.clearAllTasks;
 	}
 
+	// Help message explaining all available commands =================================================================
 	static help(): string {
 		let helpMessage: string = '';
 
-		helpMessage += 'cipher v0.0.1 \n\n';
+		helpMessage += 'cipher v0.0.2 \n\n';
 
 		helpMessage += 'help()                        This Message\n';
 		helpMessage += 'report(roomName?)             Creates a report of all requests (in a room)\n';
@@ -21,6 +23,7 @@ export class Console {
 		return helpMessage;
 	}
 
+	// Used to clear all Request. Can be limited to a single room, if room name is provided as string =================
 	static clearAllRequests(roomName?: string): string {
 		if (roomName) {
 			Game.rooms[roomName].memory.Requests = new Array<Request>();
@@ -35,15 +38,14 @@ export class Console {
 		return 'Error while trying to clear requests!';
 	}
 
+	// Used to clear all Tasks. Can be limited to a single room, if room name is provided as string ===================
 	static clearAllTasks(roomName?: string): string {
 		if (roomName) {
-			// Set all creeps of this room to idle --------------------------------------------------------------------
 			const creeps: Creep[] = Game.rooms[roomName].getCreeps();
 			for (const c of creeps) {
 				c.memory.isIdle = true
 			}
 
-			// Reset Task array ---------------------------------------------------------------------------------------
 			Game.rooms[roomName].memory.Tasks = new Array<Task>();
 			return 'Cleared all tasks of room ' + roomName;
 		} else {
@@ -52,6 +54,7 @@ export class Console {
 				for (const c of creeps) {
 					c.memory.isIdle = true
 				}
+
 				Game.rooms[r].memory.Tasks = new Array<Task>();
 				return 'Cleared all tasks in all rooms';
 			}
@@ -60,6 +63,7 @@ export class Console {
 		return 'Error while trying to clear tasks!'
 	}
 
+	// Creates a report of all requests and tasks. Can be limited to a single room ====================================
 	static report(roomName?: string): string {
 		let report: string = '';
 		if (roomName) {
@@ -75,6 +79,7 @@ export class Console {
 		return report;
 	}
 
+	// Helper function for report(). Handles visualization all SpawnRequests ==========================================
 	static reportSpawnRequests(roomName?: string): string {
 		let report: string =
 			'\n' + '\tSpawn requests\n' + '╔════════╤═════════════╤══════════╗\n' + '║ ROOM   │ ROLE        │ PRIORITY ║\n';
@@ -115,6 +120,7 @@ export class Console {
 		return report;
 	}
 
+	// Helper function for report(). Handles visualization of all TransportRequests ===================================
 	static reportTransportRequests(roomName?: string): string {
 		let report: string =
 			'\n' +
@@ -156,7 +162,6 @@ export class Console {
 		}
 
 		report += '╚════════╧═════════════╧══════════╝\n';
-
 		return report;
 	}
 }

@@ -52,11 +52,11 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
 		// Show room statistics ---------------------------------------------------------------------------------------
 		if (ROOM_STATISTICS && Game.cpu.bucket > 9000) {
-			Visuals.displayStatistics(room);
+			Visuals.displayStatistics(room);					// Shows statistics in top left corner
 		}
 
 		if (ROOM_EUCLID_DIST) {
-			Visuals.displayEuclidDist(room);
+			Visuals.displayEuclidDist(room);					// Visualizes matrix containing euclidian distance
 		}
 	}
 });

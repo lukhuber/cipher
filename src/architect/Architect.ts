@@ -13,7 +13,7 @@ import {
 export class Architect {
 	// This function is call for all uninitialized rooms ==============================================================
 	static init(room: Room): void {
-		room.memory.euclideanDistance = calcEuclideanDistance(room);		// Save euclidDist for this room 
+		room.memory.euclideanDistance = calcEuclideanDistance(room);		// Save euclidDist for this room
 
 		Architect.placeBunkerAnchor(room);									// Places the bunker anchor at best pos
 		Architect.placeMiningSiteAnchors(room);								// Anchors for mining site containers
@@ -88,17 +88,29 @@ export class Architect {
 
 		if (roomLevel >= 2) {
 			updateBunkerRCL2(room, anchorPos);
-		} else if (roomLevel >= 3) {
+		}
+
+		if (roomLevel >= 3) {
 			updateBunkerRCL3(room, anchorPos);
-		} else if (roomLevel >= 4) {
+		}
+
+		if (roomLevel >= 4) {
 			updateBunkerRCL4(room, anchorPos);
-		} else if (roomLevel >= 5) {
+		}
+
+		if (roomLevel >= 5) {
 			updateBunkerRCL5(room, anchorPos);
-		} else if (roomLevel >= 6) {
+		}
+
+		if (roomLevel >= 6) {
 			updateBunkerRCL6(room, anchorPos);
-		} else if (roomLevel >= 7) {
+		}
+
+		if (roomLevel >= 7) {
 			updateBunkerRCL7(room, anchorPos);
-		} else if (roomLevel >= 8) {
+		}
+
+		if (roomLevel >= 8) {
 			updateBunkerRCL8(room, anchorPos);
 		}
 	}

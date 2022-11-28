@@ -16,13 +16,13 @@ export class Supervisor {
 		Supervisor.runTasks(room);			// Cycles through all creeps of this room and run their tasks
 	}
 
-	// All creeps not complete full and set to idle are filled, before a new Request is assigned to them ==============
+	// All creeps completely emtpy and set to idle are filled, before a new Request is assigned to them ===============
 	private static refuelIdleCreeps(room: Room): void {
 		const creeps: Creep[] = room.getCreeps();
 
 		for (const creep of creeps) {
-			// Skip creep if he has something to do -------------------------------------------------------------------
-			if (!creep.memory.isIdle) {
+			// Skip creep if he has something to do or is not completely empty ----------------------------------------
+			if (!creep.memory.isIdle || creep.store.getUsedCapacity() != 0) {
 				delete creep.memory.refuelTargetId;
 				continue;
 			}
@@ -48,7 +48,7 @@ export class Supervisor {
 
 	}
 
-	// A full and idle creep is assigned a new Request ================================================================
+	// A not empty and idle creep is assigned a new Request ===========================================================
 	private static assignRequests(room: Room): void {
 		let requests: Request[] = room.getCreepRequests();
 		requests = _.sortBy(requests, 'priority').reverse();	// Sort request by priority
@@ -58,7 +58,7 @@ export class Supervisor {
 
 		// Assign the obligatory upgradeRequest of each room to all upgraders -----------------------------------------
 		for (const u of upgraders) {
-			if (!u.memory.isIdle || u.store.getFreeCapacity() > 0) {	// Skip this creep, if he isn't idle or full
+			if (!u.memory.isIdle || u.store.getUsedCapacity() === 0) {	// Skip this creep, if he isn't idle or empty
 				continue;
 			}
 
@@ -71,7 +71,7 @@ export class Supervisor {
 
 		// Assign the top most Request to the next worker, if that Request is not yet satisfied by other workers ------
 		for (const w of workers) {
-			if (!w.memory.isIdle || w.store.getFreeCapacity() > 0) {	// Skip this creep, if he isn't idle or full
+			if (!w.memory.isIdle || w.store.getUsedCapacity() === 0) {	// Skip this creep, if he isn't idle or empty
 				continue;
 			}
 

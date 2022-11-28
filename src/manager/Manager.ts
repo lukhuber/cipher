@@ -201,12 +201,12 @@ export class Manager {
 
 		for (const r of existingTransportRequests) {
 
-			// Check if spawn filled itself (1 energy/s) and delete Request if it did ---------------------------------
+			// Check if target is full and delete Request -------------------------------------------------------------
 			const target = Game.getObjectById(r.targetId) as SinkUnit;
 			if(target === null) {
 				throw new Error ('Target of TransportRequest does not exist (anymore)');
 			}
-			if(target instanceof StructureSpawn) {
+			if(target) {
 				const targetIsFull: boolean = target.store.getFreeCapacity(RESOURCE_ENERGY) === 0;
 
 				if (targetIsFull) {
@@ -247,7 +247,7 @@ export class Manager {
 		const existingRequests: Request[] = room.getRequestsByType('build');
 
 		for (const request of existingRequests) {
-			if (Game.getObjectById(request.targetId) === undefined) {
+			if (Game.getObjectById(request.targetId) === null) {
 				// Set assigned Creeps to idle
 				for (const creepPair of request.assignedCreeps) {
 					const creep: Creep = Game.creeps[creepPair[0]];

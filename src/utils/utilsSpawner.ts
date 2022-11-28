@@ -11,12 +11,12 @@ function getHarvesterParts(room: Room): BodyPartConstant[] {
 
 	let workPossible: number = Math.floor(energyAvailable / 100) 			// This much WORK are possible
 	const energyIsRemaining: boolean = energyAvailable % 100 >= 50			// Check if there is still energy for MOVE
-	workPossible = energyIsRemaining ? workPossible : workPossible - 	1	// Adjust number of WORK, depending on eIR
+	workPossible = energyIsRemaining ? workPossible : workPossible - 1		// Adjust number of WORK, depending on eIR
 	workPossible = workPossible > 5 ? 5 : workPossible						// We only want max. 5 WORK
 
 	energyAvailable -= workPossible * 100									// Adjust energyAvailable
 
-	let movePossible: number = Math.floor(energyAvailable / 100)			// This much MOVE are possible
+	let movePossible: number = Math.floor(energyAvailable / 50)				// This much MOVE are possible
 	movePossible = movePossible > 5 ? 5 : movePossible						// We only want max. 5 MOVE
 
 	// Prepare array to return ----------------------------------------------------------------------------------------

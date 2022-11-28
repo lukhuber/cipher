@@ -1,4 +1,4 @@
-import { SpawnRequest, TransportRequest, UpgradeRequest } from '.././request/Request';
+import { SpawnRequest, TransportRequest, UpgradeRequest, BuildRequest } from '.././request/Request';
 
 // The Manager is responsible for creating all requests, which the Supervisor will then assign to creeps ##############
 export class Manager {
@@ -14,6 +14,8 @@ export class Manager {
 		Manager.manageWorkerCount(room);			// Creates spawn requests for workers, depending on available energy
 		Manager.createTransportRequests(room);		// Creates transport requests to fill energy sinks/storages
 		Manager.updateTransportRequests(room);		// Checks and adjusts existing transport requests
+		Manager.createBuildRequests(room);			// Creates building requets for each construction site
+		Manager.updateBuildRequests(room);			// Delete finished constructions from the requestlist
 	}
 
 	private static createPermanentRequests(room: Room): void {
@@ -157,7 +159,7 @@ export class Manager {
 
 	// If a energy sink/storage has no request yet, but needs energy, this function will create a TransportRequest ====
 	private static createTransportRequests(room: Room): void {
-		const existingRequests = room.getTransportRequests();
+		const existingRequests: Request[] = room.getTransportRequests();
 
 		// Check if spawns need to be filled --------------------------------------------------------------------------
 		const spawns: StructureSpawn[] = room.find(FIND_MY_STRUCTURES, {
@@ -224,5 +226,37 @@ export class Manager {
 		}
 
 
+	}
+
+	// If a construction site has no request yet, this function will create a BuildRequest ============================
+	private static createBuildRequests(room: Room): void {
+		const constructionSites: ConstructionSite[] = room.find(FIND_MY_CONSTRUCTION_SITES);
+		const existingRequests: Request[] = room.getRequestsByType('build');
+
+		for (const conSite of constructionSites) {
+			const buildRequest: BuildRequest = new BuildRequest(conSite.id);
+
+			if (!existingRequests.some((r) => r.targetId === buildRequest.targetId)) {
+				room.memory.Requests.push(buildRequest);
+			}
+		}
+	}
+
+	// After constructions are finished, they need to be removed from the BuildRequests ===============================
+	private static updateBuildRequests(room: Room): void {
+		const existingRequests: Request[] = room.getRequestsByType('build');
+
+		for (const request of existingRequests) {
+			if (Game.getObjectById(request.targetId) === undefined) {
+				// Set assigned Creeps to idle
+				for (const creepPair of request.assignedCreeps) {
+					const creep: Creep = Game.creeps[creepPair[0]];
+					creep.memory.isIdle = true;
+				}
+				// Delete the Request
+				const index = room.memory.Requests.indexOf(request, 0);
+				room.memory.Requests.splice(index, 1)
+			}
+		}
 	}
 }

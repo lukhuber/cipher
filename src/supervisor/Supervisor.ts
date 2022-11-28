@@ -23,7 +23,15 @@ export class Supervisor {
 		for (const creep of creeps) {
 			// Skip creep if he has something to do -------------------------------------------------------------------
 			if (!creep.memory.isIdle) {
+				delete creep.memory.refuelTargetId;
 				continue;
+			}
+
+			// In case the target (dropped energy) has vanished it needs to be removed --------------------------------
+			if (creep.memory.refuelTargetId != undefined) {
+				if (Game.getObjectById(creep.memory.refuelTargetId) === null) {
+					delete creep.memory.refuelTargetId;
+				}
 			}
 
 			if (!creep.memory.refuelTargetId) {
@@ -74,6 +82,7 @@ export class Supervisor {
 					request.assignedCreeps.push([w.name, currentEnergy]);
 					request.outboundEnergy += currentEnergy;
 					w.memory.isIdle = false;
+					break;
 				}
 			}
 

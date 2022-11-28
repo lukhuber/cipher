@@ -1,5 +1,5 @@
 function getHarvesterParts(room: Room): BodyPartConstant[] {
-	const workerIsAvailable: boolean = room.getCreepsByRole('worker').length < 0
+	const workerIsAvailable: boolean = room.getCreepsByRole('worker').length > 0
 
 	// When no worker is in the room, the harvester must haul energy to spawn -----------------------------------------
 	if(!workerIsAvailable) {

@@ -17,4 +17,5 @@ interface CreepMemory {
 	assignedMiningSite?: string;
 	assignedUpgradeSite?: string;
 	source?: Source | null;
+	refuelTargetId?: Id<_HadId>;
 }

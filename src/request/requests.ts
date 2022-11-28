@@ -16,7 +16,9 @@ function doUpgradeRequest(request: Request): void {
         const creep: Creep = Game.creeps[creepPair[0]];
         const energy: number = creepPair[1];
 
+        // If the creep dies during this request, update request accordingly ------------------------------------------
         if (creep === undefined) {
+            request.outboundEnergy -= energy;
             removeDeadCreepFromRequest(creepPair[0], request);
             return;
         }
@@ -49,7 +51,9 @@ function doTransportRequest(request: Request): void {
         const creep: Creep = Game.creeps[creepPair[0]];
         const energy: number = creepPair[1];
 
+        // If the creep dies during this request, update request accordingly ------------------------------------------
         if (creep === undefined) {
+            request.outboundEnergy -= energy;
             removeDeadCreepFromRequest(creepPair[0], request);
             return;
         }

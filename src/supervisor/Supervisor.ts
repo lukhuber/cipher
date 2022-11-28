@@ -21,26 +21,23 @@ export class Supervisor {
 		const creeps: Creep[] = room.getCreeps();
 
 		for (const creep of creeps) {
-			if (creep.memory.isIdle && creep.store.getFreeCapacity() > 0) {
-				const refuelStationId: Id<_HasId> | undefined = room.getRefuelStation();	// This can be optimized to not
-				const droppedEnergyId: Id<_HasId> | undefined = room.getDroppedEnergy();	// ... run with each creep
+			// Skip creep if he has something to do -------------------------------------------------------------------
+			if (!creep.memory.isIdle) {
+				continue;
+			}
 
-				if(refuelStationId != undefined) {
-					const target = Game.getObjectById(refuelStationId) as Structure
-					if(creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-			    		creep.moveTo(target);
-					}
-				} else if (droppedEnergyId != undefined) {
-					const target = Game.getObjectById(droppedEnergyId) as Resource
-					if(creep.pickup(target) == ERR_NOT_IN_RANGE) {
-			        	creep.moveTo(target);
-			    	}
-				} else {
-					console.log('Could not find target for refuel of ' + creep.name);
-					continue;
+			if (!creep.memory.refuelTargetId) {
+				creep.memory.refuelTargetId = room.getRefuelTargetId();
+			} else {
+				if (creep.memory.refuelTargetId === undefined) {
+					console.log ('No target to refuel ' + creep.name + ' could be found!');
 				}
+
+				const target: Structure | Resource = Game.getObjectById(creep.memory.refuelTargetId);
+				creep.getEnergy(target);
 			}
 		}
+
 	}
 
 	// A full and idle creep is assigned a new Request ================================================================

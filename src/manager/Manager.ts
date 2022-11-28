@@ -8,7 +8,7 @@ export class Manager {
 
 	// This function combines all other functions assessing the current state of the room and creating requests =======
 	static run(room: Room): void {
-		Manager.createPermanentRequests(room);	// Adds permanent Requests (i.e. UpgradeController)
+		Manager.createPermanentRequests(room);		// Adds permanent Requests (i.e. UpgradeController)
 		Manager.monitorMiningSites(room);			// Makes sure, that each source has a Harvester
 		Manager.monitorUpgradeSite(room);			// Makes sure, that one Upgrader is always available
 		Manager.manageWorkerCount(room);			// Creates spawn requests for workers, depending on available energy

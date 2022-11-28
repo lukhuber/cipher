@@ -16,12 +16,13 @@ interface Room {
 	getNumberOfTasksByType(type: string): number;
 	getRefuelStation(): Id<_HasId> | undefined;
 	getDroppedEnergy(): Id<_HasId> | undefinded;
+	getRefuelTargetId(): ID<_HadId> | undefined;
 }
 
 interface Creep {
 	harvestSource(): void;
 	fillSpawn(spawn: StructureSpawn): void;
-	getEnergy(target: StructureStorage | StructureContainer | Resource): void;
+	getEnergy(target: Structure | Resource): void;
 }
 
 type SinkUnit =

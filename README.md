@@ -2,7 +2,7 @@
 
 cipher is an artificial intelligence (AI) written in TypeScript for Screeps, a multiplayer programming strategy game. The aim of this AI is to run completely autonomous without the need of any manual building placement or other human intervention.
 
-**Current version: cipher v0.0.2**
+**Current version: cipher v0.0.3**
 
 ### May I use or modify cipher?
 
@@ -10,7 +10,7 @@ You are free to use and modifiy this codebase. However, in my opinion Screeps on
 
 # Installation
 
-To use cipher for as your AI in Screeps you need to download or clone this repository to your machine. Furthermore you will need `npm` to install all needed dependencies. This codebase uses `rollup` to bundle the compiled Typescript into one single `main.js`. Make sure your machine uses the local installation of `rollup` of this repository instead of any globally installed version.
+To use cipher as your AI in Screeps you need to download or clone this repository to your machine. Furthermore you will need `npm` to install all needed dependencies. This codebase uses `rollup` to bundle the compiled Typescript into one single `main.js`. Make sure your machine uses the local installation of `rollup` of this repository instead of any globally installed version.
 
 Rename `screeps.sample.json` to `screeps.json` and replace each value depending on the server you are playing on.
 
@@ -52,3 +52,4 @@ These feature are not in any particular order, but represent a simple TODO list 
 ### Known Bugs
 
 - Harvesters throw an error during their very first tick, as mining site is not yet assigned
+- Creeps could be assigned to `Requests` smarter. Currently they fill themselves each time, before they get assigned a new `Request`. This is not necessary most times.

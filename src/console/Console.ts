@@ -13,7 +13,7 @@ export class Console {
 	static help(): string {
 		let helpMessage: string = '';
 
-		helpMessage += 'cipher v0.0.2 \n\n';
+		helpMessage += 'cipher v0.0.3 \n\n';
 
 		helpMessage += 'help()                        This Message\n';
 		helpMessage += 'report(roomName?)             Creates a report of all requests (in a room)\n';

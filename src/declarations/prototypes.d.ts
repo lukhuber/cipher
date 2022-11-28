@@ -7,10 +7,15 @@ interface Room {
 	getCreeps(): Creep[];
 	getSpawnRequests(): SpawnRequest[];
 	getTransportRequests(): TransportRequest[];
+	getRequests(): Request[];
+	getBuildingRequests(): Request[];
+	getCreepRequests(): Request[];
+	getRequestsByType(type: string): Request[];
 	getTasks(): Task[];
+	getTasksByType(type: string): Task[];
 	getNumberOfTasksByType(type: string): number;
-	getRefuelStation(): string | undefined;
-	getDroppedEnergy(): string | undefinded;
+	getRefuelStation(): Id<_HasId> | undefined;
+	getDroppedEnergy(): Id<_HasId> | undefinded;
 }
 
 interface Creep {
@@ -27,12 +32,13 @@ type SinkUnit =
 	| StructureNuker
 	| StructureTower;
 
-type StorageUnit = 
-	| StructureContainer 
-	| StructureTerminal 
+type StorageUnit =
+	| StructureContainer
+	| StructureTerminal
 	| StructureStorage;
 
-type Request = 
+type Request =
+	| UpgradeRequest
 	| SpawnRequest
 	| TransportRequest
 	| RefuelRequest;
@@ -41,9 +47,9 @@ type Task =
 	| RefuelTask
 	| UpgradeTask;
 
-type Roles = 
-	| 'harvester' 
-	| 'worker' 
-	| 'upgrader' 
-	| 'transporter' 
+type Roles =
+	| 'harvester'
+	| 'worker'
+	| 'upgrader'
+	| 'transporter'
 	| 'queen';

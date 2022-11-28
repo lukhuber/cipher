@@ -16,15 +16,35 @@ Room.prototype.getTransportRequests = function (): TransportRequest[] {
   return _.filter(this.memory.Requests, (r) => r.type === 'transport');
 };
 
+Room.prototype.getRequests = function (): Request[] {
+    return this.memory.Requests;
+}
+
+Room.prototype.getBuildingRequests = function (): Request[] {
+    return _.filter(this.memory.Requests, (r) => r.type === 'spawn')
+}
+
+Room.prototype.getCreepRequests = function (): Request[] {
+    return _.filter(this.memory.Requests, (r) => r.type != 'spawn')
+}
+
+Room.prototype.getRequestsByType = function (type: string): Request[] {
+    return _.filter(this.memory.Requests, (r) => r.type === type);
+}
+
 Room.prototype.getTasks = function (): Task[] {
   return this.memory.Tasks;
+}
+
+Room.prototype.getTasksByType = function (type: string): Task[] {
+    return _.filter(this.memory.Tasks, (r) => r.type === type);
 }
 
 Room.prototype.getNumberOfTasksByType = function(type: string): number {
   return _.filter(this.memory.Tasks, (r) => r.type === type).length;
 }
 
-Room.prototype.getRefuelStation = function(): string | undefined {
+Room.prototype.getRefuelStation = function(): Id<_HasId> | undefined {
   const storage: StructureStorage[] = this.find(FIND_MY_STRUCTURES, {filter: { structureType: STRUCTURE_STORAGE }}) as unknown as StructureStorage[];
   const containers: StructureContainer[] = this.find(FIND_MY_STRUCTURES, {filter: { structureType: STRUCTURE_CONTAINER }}) as unknown as StructureContainer[];
 
@@ -37,6 +57,6 @@ Room.prototype.getRefuelStation = function(): string | undefined {
   }
 };
 
-Room.prototype.getDroppedEnergy = function(): string | undefined {
+Room.prototype.getDroppedEnergy = function(): Id<_HasId> | undefined {
   return _.max(this.find(FIND_DROPPED_RESOURCES), 'amount').id;
 };

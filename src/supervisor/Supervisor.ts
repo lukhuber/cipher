@@ -1,14 +1,13 @@
-import { RefuelTask, UpgradeTask } from '.././task/Task';
 import { runRefuel, runUpgrade } from '.././task/Tasks';
-import { SpawnRequest, TransportRequest } from '.././request/Request';
+import { SpawnRequest, TransportRequest, UpgradeRequest } from '.././request/Request';
+import { triageRequest } from '.././request/Requests';
 import { getBodyParts, getNewCreepName } from '.././utils/utilsSpawner';
 
 // The Supervisor converts Requests to Tasks and assigns the to creeps ################################################
 export class Supervisor {
 	static init(room: Room): void {
-		Supervisor.validateTasks(room);		// Check if Tasks are still fullfillable. Creep could have died already
-		Supervisor.assignRefuelTask(room);	// Assign RefuelTask to empty Creeps
-		Supervisor.assignUpgradeTask(room); // Assign UpgradeTask to upgraders (always) and workers (if no other tasks are pending)
+		Supervisor.refuelIdleCreeps(room);				// Refuels each Creep before assigning a new request
+		Supervisor.assignRequests(room);				// Assign the next most important Request to all Creeps
 	}
 
 	static run(room: Room): void {
@@ -17,16 +16,77 @@ export class Supervisor {
 		Supervisor.runTasks(room);			// Cycles through all creeps of this room and run their tasks
 	}
 
-	private static validateTasks(room: Room): void {
-		const tasks: Task[] = room.getTasks();
+	// All creeps not complete full and set to idle are filled, before a new Request is assigned to them ==============
+	private static refuelIdleCreeps(room: Room): void {
+		const creeps: Creep[] = room.getCreeps();
 
-		for (const task of tasks) {
-			const creep: Creep | undefined = Game.creeps[task.creepName];
+		for (const creep of creeps) {
+			if (creep.memory.isIdle && creep.store.getFreeCapacity() > 0) {
+				const refuelStationId: Id<_HasId> | undefined = room.getRefuelStation();	// This can be optimized to not
+				const droppedEnergyId: Id<_HasId> | undefined = room.getDroppedEnergy();	// ... run with each creep
 
-			// Delete associated task of this creep, because it died while doing the task -----------------------------
-			if (creep === undefined) {
-				const index: number = room.memory.Tasks.indexOf(task);
-				room.memory.Tasks.splice(index, 1);
+				if(refuelStationId != undefined) {
+					const target = Game.getObjectById(refuelStationId) as Structure
+					if(creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+			    		creep.moveTo(target);
+					}
+				} else if (droppedEnergyId != undefined) {
+					const target = Game.getObjectById(droppedEnergyId) as Resource
+					if(creep.pickup(target) == ERR_NOT_IN_RANGE) {
+			        	creep.moveTo(target);
+			    	}
+				} else {
+					console.log('Could not find target for refuel of ' + creep.name);
+					continue;
+				}
+			}
+		}
+	}
+
+	// A full and idle creep is assigned a new Request ================================================================
+	private static assignRequests(room: Room): void {
+		let requests: Request[] = room.getCreepRequests();
+		requests = _.sortBy(requests, 'priority').reverse();	// Sort request by priority
+
+		const upgraders: Creep[] = room.getCreepsByRole('upgrader');
+		const workers: Creep[] = room.getCreepsByRole('worker');
+
+		// Assign the obligatory upgradeRequest of each room to all upgraders -----------------------------------------
+		for (const u of upgraders) {
+			if (!u.memory.isIdle || u.store.getFreeCapacity() > 0) {	// Skip this creep, if he isn't idle or full
+				continue;
+			}
+
+			const upgradeRequest: Request[] = room.getRequestsByType('upgrade');
+			const currentEnergy: number = u.store.getUsedCapacity(RESOURCE_ENERGY);
+			upgradeRequest[0].assignedCreeps.push([u.name, currentEnergy])
+			upgradeRequest[0].outboundEnergy += currentEnergy;
+			u.memory.isIdle = false
+		}
+
+		// Assign the top most Request to the next worker, if that Request is not yet satisfied by other workers ------
+		for (const w of workers) {
+			if (!w.memory.isIdle || w.store.getFreeCapacity() > 0) {	// Skip this creep, if he isn't idle or full
+				continue;
+			}
+
+			for (const request of requests) {
+				if (request.outboundEnergy < request.neededEnergy) {
+					const currentEnergy: number = w.store.getUsedCapacity(RESOURCE_ENERGY);
+
+					request.assignedCreeps.push([w.name, currentEnergy]);
+					request.outboundEnergy += currentEnergy;
+					w.memory.isIdle = false;
+				}
+			}
+
+			// If no creep is not assigned at this point, assign it to do upgradeRequest ------------------------------
+			if (w.memory.isIdle) {
+				const upgradeRequest: Request[] = room.getRequestsByType('upgrade');
+				const currentEnergy: number = w.store.getUsedCapacity(RESOURCE_ENERGY);
+				upgradeRequest[0].assignedCreeps.push([w.name, currentEnergy])
+				upgradeRequest[0].outboundEnergy += currentEnergy;
+				w.memory.isIdle = false
 			}
 		}
 	}
@@ -83,53 +143,12 @@ export class Supervisor {
 		}
 	}
 
-	private static assignRefuelTask(room: Room): void {
-		const upgraders: Creep[] = room.getCreepsByRole('upgrader');
-		const workers: Creep[] = room.getCreepsByRole('worker');
-
-		const creeps: Creep[] = upgraders.concat(workers);
-
-		for (const c of creeps) {
-			if (c.memory.isIdle && c.store.getUsedCapacity() === 0) {
-				const rTask: RefuelTask = new RefuelTask(c.name);
-				room.memory.Tasks.push(rTask);
-			}
-		}
-	}
-
-	private static assignUpgradeTask(room: Room): void {
-		var numberOfOtherTasks: number = 0;
-		const otherTaskTypes: string[] = ["build"]		// Types of other Tasks which have priority over upgrading
-		const upgraders: Creep[] = room.getCreepsByRole('upgrader');
-		var creeps: Creep[] = upgraders;
-		
-		for (const type of otherTaskTypes) {
-			numberOfOtherTasks += room.getNumberOfTasksByType(type);
-		}
-
-		// Only include workers, if no other tasks are pending --------------------------------------------------------
-		if (numberOfOtherTasks === 0) {
-			const workers: Creep[] = room.getCreepsByRole('worker');
-			creeps = upgraders.concat(workers)
-		}
-
-		for (const c of creeps) {
-			if (c.memory.isIdle && c.store.getUsedCapacity() != 0) {
-				const uTask: UpgradeTask = new UpgradeTask(c.name);
-				room.memory.Tasks.push(uTask);
-			}
-		}
-	}
-
 	private static runTasks(room: Room): void {
-		const tasks: Task[] = room.memory.Tasks;
+		const requests: Request[] = room.memory.Requests;
 
-		for (const task of tasks) {
-			if (task.type === 'refuel') {
-				runRefuel(task);
-			} else if (task.type === 'upgrade') {
-				runUpgrade(task);
-			}
+		for (const request of requests) {
+			triageRequest(request);
 		}
 	}
+
 }

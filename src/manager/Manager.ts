@@ -1,14 +1,34 @@
-import { SpawnRequest, TransportRequest } from '.././request/Request';
+import { SpawnRequest, TransportRequest, UpgradeRequest } from '.././request/Request';
 
 // The Manager is responsible for creating all requests, which the Supervisor will then assign to creeps ##############
 export class Manager {
-	// This function combines all other functions assessing the current state of the room and creating requests =======
 	static init(room: Room): void {
+
+	}
+
+	// This function combines all other functions assessing the current state of the room and creating requests =======
+	static run(room: Room): void {
+		Manager.createPermanentRequests(room);	// Adds permanent Requests (i.e. UpgradeController)
 		Manager.monitorMiningSites(room);			// Makes sure, that each source has a Harvester
 		Manager.monitorUpgradeSite(room);			// Makes sure, that one Upgrader is always available
 		Manager.manageWorkerCount(room);			// Creates spawn requests for workers, depending on available energy
 		Manager.createTransportRequests(room);		// Creates transport requests to fill energy sinks/storages
 		Manager.updateTransportRequests(room);		// Checks and adjusts existing transport requests
+	}
+
+	private static createPermanentRequests(room: Room): void {
+		// Check if upgradeRequest for this room is existing. Continue if not -----------------------------------------
+		if (_.includes(_.map(room.memory.Requests, (r) => r.type), 'upgrade')) {
+			return;
+		}
+
+		if (room.controller != undefined) {
+			const newUpgradeRequest: UpgradeRequest = new UpgradeRequest(room.controller.id);
+			room.memory.Requests.push(newUpgradeRequest);
+		} else {
+			console.log(room.name + "does not have a controller. \n" +
+						"No permanent UpgradeRequest created for this room.");
+		}
 	}
 
 	// Check if the assigned Harvester is (still) alive and creates a SpawnRequest if not =============================
@@ -129,7 +149,7 @@ export class Manager {
 
 			// Create request, if no workers is spawning and no request is pending ------------------------------------
 			if (workerRequests === 0 && workerSpawning === 0) {
-				const spawnRequest: SpawnRequest = new SpawnRequest(8, 'worker');
+				const spawnRequest: SpawnRequest = new SpawnRequest(4, 'worker');
 				room.memory.Requests.push(spawnRequest);
 			}
 		}
@@ -148,9 +168,8 @@ export class Manager {
 			const spawnIsFull: boolean = s.store.getFreeCapacity(RESOURCE_ENERGY) === 0;
 
 			if (!spawnIsFull) {
-				const transportRequest: TransportRequest = new TransportRequest(10, s, RESOURCE_ENERGY);
-
-				if (!existingRequests.some((r) => r.target.id === transportRequest.target.id)) {
+				const transportRequest: TransportRequest = new TransportRequest(s.id, RESOURCE_ENERGY);
+				if (!existingRequests.some((r) => r.targetId === transportRequest.targetId)) {
 					room.memory.Requests.push(transportRequest);
 				}
 			}
@@ -165,9 +184,9 @@ export class Manager {
 			const extensionIsFull: boolean = e.store.getFreeCapacity(RESOURCE_ENERGY) === 0;
 
 			if (!extensionIsFull) {
-				const transportRequest: TransportRequest = new TransportRequest(9, e, RESOURCE_ENERGY);
+				const transportRequest: TransportRequest = new TransportRequest(e.id, RESOURCE_ENERGY);
 
-				if (!existingRequests.some((r) => r.target.id === transportRequest.target.id)) {
+				if (!existingRequests.some((r) => r.targetId === transportRequest.targetId)) {
 					room.memory.Requests.push(transportRequest);
 				}
 			}
@@ -176,19 +195,34 @@ export class Manager {
 
 	// Updating existing TransportRequests. A creep could have died while hauling =====================================
 	private static updateTransportRequests(room: Room): void {
-		const existingRequests = room.getTransportRequests();
+		const existingTransportRequests = room.getRequestsByType('transport');
 
-		for (const r of existingRequests) {
-			const target = Game.getObjectById(r.target.id);
+		for (const r of existingTransportRequests) {
 
+			// Check if spawn filled itself (1 energy/s) and delete Request if it did ---------------------------------
+			const target = Game.getObjectById(r.targetId) as SinkUnit;
+			if(target === null) {
+				throw new Error ('Target of TransportRequest does not exist (anymore)');
+			}
 			if(target instanceof StructureSpawn) {
 				const targetIsFull: boolean = target.store.getFreeCapacity(RESOURCE_ENERGY) === 0;
 
 				if (targetIsFull) {
-					const index = existingRequests.indexOf(r, 0);
+					// Set assigned Creeps to idle
+					for (const creepPair of r.assignedCreeps) {
+						const creep: Creep = Game.creeps[creepPair[0]];
+						creep.memory.isIdle = true;
+					}
+					// Delete the Request
+					const index = room.memory.Requests.indexOf(r, 0);
 					room.memory.Requests.splice(index, 1)
 				}
 			}
+
+			// Update 'neededEnergy' of all Requests ------------------------------------------------------------------
+			r.neededEnergy = target.store.getFreeCapacity(RESOURCE_ENERGY);
 		}
+
+
 	}
 }

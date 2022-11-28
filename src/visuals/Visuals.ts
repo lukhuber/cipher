@@ -9,6 +9,7 @@ export class Visuals {
 	static displayStatistics(room: Room): void {
 		Visuals.bars(room);
 		Visuals.creepsStats(room);
+		Visuals.roomRequests(room);
 	}
 
 	static displayEuclidDist(room: Room): void {
@@ -113,10 +114,51 @@ export class Visuals {
 
 		// Fill the box with current creep counts ---------------------------------------------------------------------
 		creepsStats.text(currentQueens.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 1.75, styleValues)
-		creepsStats.text(currentHarvesters.toString() + ' / ' + neededHarvesters.toString(), 
+		creepsStats.text(currentHarvesters.toString() + ' / ' + neededHarvesters.toString(),
 										 pos.x + PANEL_WIDTH - 0.2, pos.y + 2.75, styleValues)
 		creepsStats.text(currentUpgraders.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 3.75, styleValues)
 		creepsStats.text(currentWorkers.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 4.75, styleValues)
 		creepsStats.text(currentTransporters.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 5.75, styleValues)
+	}
+
+	private static roomRequests(room: Room): void {
+		// Define the anchor of this box ------------------------------------------------------------------------------
+		const pos: { x:number; y: number } = { x: ANCHOR.x + PANEL_WIDTH + 0.5, y: ANCHOR.y - 0.65};
+		const styleHeading: { opacity: number; font: number; align: 'center' | 'left' | 'right' | undefined } = {
+			opacity: OPACITY_TEXT,
+			font: FONTSIZE,
+			align: 'left',
+		};
+		const styleLabels: { opacity: number; font: number; align: 'center' | 'left' | 'right' | undefined } = {
+			opacity: OPACITY_TEXT,
+			font: FONTSIZE - 0.1,
+			align: 'left',
+		};
+
+		// Get all Requests and extract information -------------------------------------------------------------------
+		let creepRequests: Request[] = _.sortBy(room.getCreepRequests(), 'priority').reverse();
+
+		// Draw the box for the creeps stats --------------------------------------------------------------------------
+		const roomRequests: RoomVisual = new RoomVisual(room.name);
+		roomRequests.box(pos.x, pos.y, PANEL_WIDTH, 1 + creepRequests.length, { opacity: OPACITY_BOXES });
+		roomRequests.rect(pos.x, pos.y, PANEL_WIDTH, 1, { opacity: 0.1 });
+		roomRequests.text('Pending requests', pos.x + 0.2, pos.y + 0.75, styleHeading);
+
+		// Loop to display each request in a separate row -------------------------------------------------------------
+		for (const i in creepRequests) {
+			const request: Request = creepRequests[i];
+			const assignedCreeps: [string, number][] = request.assignedCreeps;
+			let creepNames: string = ''
+
+			for (const creepPair of assignedCreeps) {
+				const creepName: string = creepPair[0];
+				creepNames += creepName + ' ';
+			}
+
+			roomRequests.text(request.type, pos.x + 0.2, pos.y + 1.65 + +i, styleLabels);			// Type of the Request
+			roomRequests.text(request.outboundEnergy, pos.x + 3.5, pos.y + 1.65 + +i, styleLabels);	// Outbound Energy
+			roomRequests.text(request.neededEnergy, pos.x + 5.5, pos.y + 1.65 + +i, styleLabels); 	// Needed Energy
+			roomRequests.text(creepNames, pos.x + 7.5, pos.y + 1.65 + +i, styleLabels); 			// Names of creeps
+		}
 	}
 }

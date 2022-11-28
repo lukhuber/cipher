@@ -40,23 +40,24 @@ export const loop = ErrorMapper.wrapLoop(() => {
 		if (!room.memory.isInitialized) {
 			Architect.init(room);								// Calc euclidean distance and place flags
 			Memory.init(room);									// Prepare memory for all entities in room
+			Manager.init(room);									// Currently not in use
 		}
 
 		// Check for new work and create requests ---------------------------------------------------------------------
 		if (room.memory.isInitialized) {
 		  Architect.run(room);									// Place construction sites
-		  Manager.init(room);									// Create request for undone work
+		  Manager.run(room);									// Create request for undone work
 		  Supervisor.init(room);								// Assign requests to creeps/spawns/towers/etc.
 		  Supervisor.run(room);									// Do the assigned requests
 		}
 
 		// Show room statistics ---------------------------------------------------------------------------------------
 		if (ROOM_STATISTICS && Game.cpu.bucket > 9000) {
-			Visuals.displayStatistics(room);					// Shows statistics in top left corner
+			Visuals.displayStatistics(room);
 		}
 
 		if (ROOM_EUCLID_DIST) {
-			Visuals.displayEuclidDist(room);					// Visualizes matrix containing euclidian distance
+			Visuals.displayEuclidDist(room);
 		}
 	}
 });

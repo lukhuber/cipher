@@ -1,7 +1,7 @@
 export class RefuelTask {
 	type: string;
 	creepName: string;
-	target: string;
+	target: string | undefined;
 	targetType: 'structure' | 'energy' | undefined;
 	status: 'pending' | 'outbound' | 'finished';
 
@@ -19,7 +19,7 @@ export class RefuelTask {
 		Game.creeps[this.creepName].memory.isIdle = false;
 	}
 
-	private getTarget(): string {
+	private getTarget(): string | undefined {
 		const room: Room = Game.creeps[this.creepName].room;
 		const refuelStation: string | undefined = room.getRefuelStation();
 		const droppedEnergy: string | undefined = room.getDroppedEnergy();
@@ -32,25 +32,8 @@ export class RefuelTask {
 			return droppedEnergy;
 		} else {
 			Game.creeps[this.creepName].memory.isIdle = true;
-			throw new Error ('Could not find target for RefuelTask of ' + this.creepName);
+			console.log('Could not find target for RefuelTask of ' + this.creepName);
+			return undefined;
 		}
-	}
-}
-
-export class UpgradeTask {
-	type: string;
-	creepName: string;
-	status: 'pending' | 'outbound' | 'upgrading' | 'finished';
-
-	constructor(creepName: string) {
-		this.type = 'upgrade';
-		this.creepName = creepName;
-		this.status = 'pending';
-
-		this.setCreepToBusy();
-	}
-
-	private setCreepToBusy(): void {
-		Game.creeps[this.creepName].memory.isIdle = false;
 	}
 }

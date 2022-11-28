@@ -6,7 +6,7 @@ export class Console {
 		global.help = this.help;
 		global.report = this.report;
 		global.clearAllRequests = this.clearAllRequests;
-		global.clearAllTasks = this.clearAllTasks;
+		global.setCreepsToIdle = this.setCreepsToIdle;
 	}
 
 	// Help message explaining all available commands =================================================================
@@ -18,7 +18,7 @@ export class Console {
 		helpMessage += 'help()                        This Message\n';
 		helpMessage += 'report(roomName?)             Creates a report of all requests (in a room)\n';
 		helpMessage += 'clearAllRequests(roomName?)   Deletes all requests (in a room)\n';
-		helpMessage += 'clearAllTasks(roomName?)	  Deletes all tasks (in a room) and sets affected creeps to idle\n';
+		helpMessage += 'setCreepsToIdle(roomName?)	  Sets all creeps (in a room) to idle\n'
 
 		return helpMessage;
 	}
@@ -38,130 +38,105 @@ export class Console {
 		return 'Error while trying to clear requests!';
 	}
 
-	// Used to clear all Tasks. Can be limited to a single room, if room name is provided as string ===================
-	static clearAllTasks(roomName?: string): string {
-		if (roomName) {
-			const creeps: Creep[] = Game.rooms[roomName].getCreeps();
-			for (const c of creeps) {
-				c.memory.isIdle = true
-			}
-
-			Game.rooms[roomName].memory.Tasks = new Array<Task>();
-			return 'Cleared all tasks of room ' + roomName;
-		} else {
-			for (const r in Game.rooms) {
-				const creeps: Creep[] = Game.rooms[r].getCreeps();
-				for (const c of creeps) {
-					c.memory.isIdle = true
-				}
-
-				Game.rooms[r].memory.Tasks = new Array<Task>();
-				return 'Cleared all tasks in all rooms';
-			}
-		}
-
-		return 'Error while trying to clear tasks!'
-	}
-
 	// Creates a report of all requests and tasks. Can be limited to a single room ====================================
 	static report(roomName?: string): string {
 		let report: string = '';
 		if (roomName) {
-			report += 'Report of all requests for room ' + roomName + '\n';
-			report += Console.reportSpawnRequests(roomName);
-			report += Console.reportTransportRequests(roomName);
+			report += Console.reportBuildingRequests(roomName);
+			report += Console.reportCreepRequests(roomName);
 		} else {
-			report += 'Report of all requests for all rooms\n';
-			report += Console.reportSpawnRequests();
-			report += Console.reportTransportRequests();
+			report += Console.reportBuildingRequests();
+			report += Console.reportCreepRequests();
 		}
 
 		return report;
 	}
 
-	// Helper function for report(). Handles visualization all SpawnRequests ==========================================
-	static reportSpawnRequests(roomName?: string): string {
-		let report: string =
-			'\n' + '\tSpawn requests\n' + '╔════════╤═════════════╤══════════╗\n' + '║ ROOM   │ ROLE        │ PRIORITY ║\n';
+	static reportBuildingRequests(roomName?: string): string {
+		const reportHeader: string = '--- REQUESTS DONE BY BUILDINGS -------------------------------------------------------------------- \n' +
+									 '╔══════════╦═══════════╦═══════════╗ \n' +
+							         '║ PRIORITY ║ TYPE      ║ ROLE      ║ \n';
+		let reportBody: string = ''
+		const reportFooter: string = '╚══════════╩═══════════╩═══════════╝ \n'
 
 		if (roomName) {
-			let spawnRequests: Request[] = Game.rooms[roomName].getSpawnRequests();
-			spawnRequests = _.sortBy(spawnRequests, (r) => r.priority, 'desc');
-
-			for (const s of spawnRequests) {
-				report +=
-					'║ ' +
-					roomName.padEnd(6, ' ') +
-					' │ ' +
-					s.role.padEnd(11, ' ') +
-					' │ ' +
-					s.priority.toString().padEnd(8, ' ') +
-					' ║\n';
-			}
+			const requests: Request[] = Game.rooms[roomName].getBuildingRequests();
+			reportBody += this.parseBuildingRequests(requests);
 		} else {
-			for (const r in Game.rooms) {
-				const room = Game.rooms[r];
-				let spawnRequests: Request[] = room.getSpawnRequests();
-				spawnRequests = _.sortBy(spawnRequests, (r) => r.priority, 'desc');
-
-				for (const s of spawnRequests) {
-					report +=
-						'║ ' +
-						room.name.padEnd(6, ' ') +
-						' │ ' +
-						s.role.padEnd(11, ' ') +
-						' │ ' +
-						s.priority.toString().padEnd(8, ' ') +
-						' ║\n';
-				}
+			for (const i in Game.rooms) {
+				const requests: Request[] = Game.rooms[i].getBuildingRequests();
+				reportBody += this.parseBuildingRequests(requests);
 			}
 		}
-		report += '╚════════╧═════════════╧══════════╝\n';
-		return report;
+
+		return reportHeader + reportBody + reportFooter;
 	}
 
-	// Helper function for report(). Handles visualization of all TransportRequests ===================================
-	static reportTransportRequests(roomName?: string): string {
-		let report: string =
-			'\n' +
-			'\tTransport requests\n' +
-			'╔════════╤═════════════╤══════════╗\n' +
-			'║ ROOM   │ TARGET      │ PRIORITY ║\n';
+	private static parseBuildingRequests(requests: Request[]): string {
+		let requestSummary: string = '';
+		requests = _.sortBy(requests, 'priority').reverse();
+		for (const request of requests) {
+
+			requestSummary += '║ ' + request.priority.toString().padEnd(9, ' ') +
+							  '║ ' + request.type.padEnd(10, ' ') +
+							  '║ ' + request.role.padEnd(10, ' ') +
+							  '║\n';
+		}
+		return requestSummary;
+	}
+
+	static reportCreepRequests(roomName?: string): string {
+		const reportHeader: string = '--- REQUESTS DONE BY CREEPS ----------------------------------------------------------------------- \n' +
+									 '╔══════════╦═══════════╦═════════════════╦═══════════════╦═════════════╦══════════════════════════╗ \n' +
+							         '║ PRIORITY ║ TYPE      ║ OUTBOUND ENERGY ║ NEEDED ENERGY ║ TARGET TYPE ║ TARGET ID                ║ \n';
+		let reportBody: string = ''
+		const reportFooter: string = '╚══════════╩═══════════╩═════════════════╩═══════════════╩═════════════╩══════════════════════════╝ \n'
 
 		if (roomName) {
-			let transportRequests: Request[] = Game.rooms[roomName].getTransportRequests();
-			transportRequests = _.sortBy(transportRequests, (r) => r.priority, 'desc');
-
-			for (const t of transportRequests) {
-				report += 
-				'║ ' + 
-				roomName.padEnd(6, ' ') + 
-				' │ ' + 
-				t.target.structureType.padEnd(11, ' ') + 
-				' │ ' + 
-				t.priority.toString().padEnd(8, ' ') + 
-				' ║\n';
-			}
+			const requests: Request[] = Game.rooms[roomName].getCreepRequests();
+			reportBody += this.parseCreepRequests(requests);
 		} else {
-			for (const r in Game.rooms) {
-				const room = Game.rooms[r];
-				let transportRequests: Request[] = room.getTransportRequests();
-				transportRequests = _.sortBy(transportRequests, (r) => r.priority, 'desc');
-
-				for (const t of transportRequests) {
-					report +=
-						'║ ' +
-						room.name.padEnd(6, ' ') +
-						' │ ' +
-						t.target.structureType.padEnd(11, ' ') +
-						' │ ' +
-						t.priority.toString().padEnd(8, ' ') +
-						' ║\n';
-				}
+			for (const i in Game.rooms) {
+				const requests: Request[] = Game.rooms[i].getCreepRequests();
+				reportBody += this.parseCreepRequests(requests);
 			}
 		}
 
-		report += '╚════════╧═════════════╧══════════╝\n';
-		return report;
+		return reportHeader + reportBody + reportFooter;
+	}
+
+	private static parseCreepRequests(requests: Request[]): string {
+		let requestSummary: string = '';
+		requests = _.sortBy(requests, 'priority').reverse();
+		for (const request of requests) {
+
+			requestSummary += '║ ' + request.priority.toString().padEnd(9, ' ') +
+							  '║ ' + request.type.padEnd(10, ' ') +
+							  '║ ' + request.outboundEnergy.toString().padEnd(16, ' ') +
+							  '║ ' + request.neededEnergy.toString().padEnd(14, ' ') +
+							  // @ts-ignore: Object is possibly 'null'.
+							  '║ ' + Game.getObjectById(request.targetId).structureType.padEnd(12, ' ') +
+							  '║ ' + request.targetId.padEnd(25, ' ') +
+							  '║\n';
+		}
+		return requestSummary;
+	}
+
+	static setCreepsToIdle(roomName?: string): string {
+		let creeps: Creep[] = [];
+
+		if (roomName) {
+			creeps = Game.rooms[roomName].getCreeps();
+		} else {
+			for (const i in Game.creeps) {
+				creeps.push(Game.creeps[i]);
+			}
+		}
+
+		for (const creep of creeps) {
+			creep.memory.isIdle = true;
+		}
+
+		return 'Creeps set to idle';
 	}
 }

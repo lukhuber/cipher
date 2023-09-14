@@ -52,3 +52,4 @@ These feature are not in any particular order, but represent a simple TODO list 
 ### Known Bugs
 
 - Harvesters throw an error during their very first tick, as mining site is not yet assigned
+- The very first upgrader in each room doesn't move as no energy is available to it

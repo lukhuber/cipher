@@ -10,7 +10,7 @@ You are free to use and modifiy this codebase. However, in my opinion Screeps on
 
 # Installation
 
-To use cipher as your AI in Screeps you need to download or clone this repository to your machine. Furthermore you will need `npm` to install all needed dependencies. This codebase uses `rollup` to bundle the compiled Typescript into one single `main.js`. Make sure your machine uses the local installation of `rollup` of this repository instead of any globally installed version.
+To use cipher as your AI in Screeps you need to download or clone this repository to your machine. Furthermore you will need `npm` to install all needed dependencies. Make sure to have Node.js version 12 installed. This codebase uses `rollup` to bundle the compiled Typescript into one single `main.js`. Make sure your machine uses the local installation of `rollup` of this repository instead of any globally installed version.
 
 Rename `screeps.sample.json` to `screeps.json` and replace each value depending on the server you are playing on.
 

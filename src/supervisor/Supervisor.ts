@@ -1,6 +1,6 @@
-import { runRefuel, runUpgrade } from '.././task/Tasks';
+import { runRefuel, runUpgrade } from '.././task/tasks';
 import { SpawnRequest, TransportRequest, UpgradeRequest } from '.././request/Request';
-import { triageRequest } from '.././request/Requests';
+import { triageRequest } from '.././request/requests';
 import { getBodyParts, getNewCreepName } from '.././utils/utilsSpawner';
 
 // The Supervisor converts Requests to Tasks and assigns the to creeps ################################################

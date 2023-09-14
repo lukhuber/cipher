@@ -3,11 +3,11 @@ import { SpawnRequest, TransportRequest, UpgradeRequest } from '.././request/Req
 import { triageRequest } from '.././request/requests';
 import { getBodyParts, getNewCreepName } from '.././utils/utilsSpawner';
 
-// The Supervisor converts Requests to Tasks and assigns the to creeps ################################################
+// The Supervisor converts Requests to Tasks and assigns them to creeps ###############################################
 export class Supervisor {
 	static init(room: Room): void {
-		Supervisor.refuelIdleCreeps(room);				// Refuels each Creep before assigning a new request
-		Supervisor.assignRequests(room);				// Assign the next most important Request to all Creeps
+		Supervisor.refuelIdleCreeps(room);	// Refuels each Creep before assigning a new request
+		Supervisor.assignRequests(room);	// Assign the next most important Request to all Creeps
 	}
 
 	static run(room: Room): void {

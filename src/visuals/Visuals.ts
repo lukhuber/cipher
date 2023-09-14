@@ -10,6 +10,7 @@ export class Visuals {
 		Visuals.bars(room);
 		Visuals.creepsStats(room);
 		Visuals.roomRequests(room);
+		Visuals.roomInformation(room);
 	}
 
 	static displayEuclidDist(room: Room): void {
@@ -160,5 +161,45 @@ export class Visuals {
 			roomRequests.text(request.neededEnergy, pos.x + 5.5, pos.y + 1.65 + +i, styleLabels); 	// Needed Energy
 			roomRequests.text(creepNames, pos.x + 7.5, pos.y + 1.65 + +i, styleLabels); 			// Names of creeps
 		}
+	}
+
+	private static roomInformation(room: Room): void {
+		// Define the anchor of this box ------------------------------------------------------------------------------
+		const pos: { x: number; y: number } = { x: ANCHOR.x, y: ANCHOR.y + 9 };
+		const styleHeading: { opacity: number; font: number; align: 'center' | 'left' | 'right' | undefined } = {
+			opacity: OPACITY_TEXT,
+			font: FONTSIZE,
+			align: 'left',
+		};
+		const styleLabels: { opacity: number; font: number; align: 'center' | 'left' | 'right' | undefined } = {
+			opacity: OPACITY_TEXT,
+			font: FONTSIZE - 0.1,
+			align: 'left',
+		};
+		const styleValues: { opacity: number; font: number; align: 'center' | 'left' | 'right' | undefined } = {
+			opacity: OPACITY_TEXT,
+			font: FONTSIZE - 0.1,
+			align: 'right',
+		};
+
+		// Get current energy amounts ---------------------------------------------------------------------------------
+		const energyAvailable: number = room.energyAvailable;
+		const energyOnGround: number = _.sum(_.map(room.find(FIND_DROPPED_RESOURCES), (energy) => energy.amount));
+
+		// Draw the box for the room information ----------------------------------------------------------------------
+		const roomInformation: RoomVisual = new RoomVisual(room.name);
+		roomInformation.box(pos.x, pos.y, PANEL_WIDTH, 6.2, { opacity: OPACITY_BOXES });
+		roomInformation.rect(pos.x, pos.y, PANEL_WIDTH, 1, { opacity: 0.1 });
+
+		// Fill the box with labels (aka. text) -----------------------------------------------------------------------
+		roomInformation.text('Room info', pos.x + 0.2, pos.y + 0.75, styleHeading);
+		roomInformation.text('NRG available', pos.x + 0.2, pos.y + 1.75, styleLabels);
+		roomInformation.text('NRG on ground', pos.x + 0.2, pos.y + 2.75, styleLabels)
+
+		// Fill the box with dynamic information ----------------------------------------------------------------------
+		roomInformation.text(energyAvailable.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 1.75, styleValues)
+		roomInformation.text(energyOnGround.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 2.75, styleValues)
+
+
 	}
 }

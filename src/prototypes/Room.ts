@@ -79,12 +79,15 @@ Room.prototype.getRefuelTargetId = function (): Id<_HasId> | undefined {
   const storage: StructureStorage[] = this.find(FIND_MY_STRUCTURES, {
     filter: { structureType: STRUCTURE_STORAGE },
   }) as unknown as StructureStorage[];
-  const containers: StructureContainer[] = this.find(FIND_MY_STRUCTURES, {
+  const containers: StructureContainer[] = this.find(FIND_STRUCTURES, {
     filter: { structureType: STRUCTURE_CONTAINER },
   }) as unknown as StructureContainer[];
   const droppedEnergy: Resource[] = this.find(FIND_DROPPED_RESOURCES);
 
-  if (storage.length > 0) {
+  // First we want to pick up dropped energy (don't want that to get to waste)
+  if (droppedEnergy.length > 0) {
+    targetId = _.max(droppedEnergy, "amount").id;
+  } else if (storage.length > 0) {
     // If a storage is built, we want to return that
     targetId = storage[0].id;
   } else if (containers.length > 0) {
@@ -92,9 +95,6 @@ Room.prototype.getRefuelTargetId = function (): Id<_HasId> | undefined {
     targetId = _.max(containers, function (c) {
       return c.store.getUsedCapacity();
     }).id;
-  } else if (droppedEnergy.length > 0) {
-    targetId = _.max(droppedEnergy, "amount").id;
   }
-
   return targetId;
 };

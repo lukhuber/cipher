@@ -18,6 +18,14 @@ export function updateBunkerRCL2(room: Room, anchorPos: RoomPosition): void {
 		  STRUCTURE_EXTENSION
 		);
   }
+
+  // Place a container at every mining site (at the flags position) ---------------------------------------------------
+  const miningSites: Flag[] = room.find(FIND_FLAGS, {filter: (f) => {return f.name.includes('mining');},});
+  for (const flag of miningSites) {
+  	room.createConstructionSite(
+  		flag.pos,
+  		STRUCTURE_CONTAINER);
+  }
 }
 
 export function updateBunkerRCL3(room: Room, anchorPos: RoomPosition): void {

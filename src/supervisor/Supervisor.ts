@@ -45,7 +45,6 @@ export class Supervisor {
 				creep.getEnergy(target);
 			}
 		}
-
 	}
 
 	// A not empty and idle creep is assigned a new Request ===========================================================

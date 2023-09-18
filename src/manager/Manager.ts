@@ -137,10 +137,24 @@ export class Manager {
 		const workerCount: number = room.getCreepsByRole('worker').length;
 		const energyOnGround: number = _.sum(_.map(room.find(FIND_DROPPED_RESOURCES), (energy) => energy.amount));
 
+		const containers: StructureContainer[] = room.find(FIND_STRUCTURES, {
+			filter: { structureType: STRUCTURE_CONTAINER },
+		}) as unknown as StructureContainer[];
+		let containerCapacity: number = 0;
+		let energyInContainers: number = 0;
+
+		if (containers.length != 0) {
+			for (const container of containers) {
+				containerCapacity += container.store.getCapacity();
+				energyInContainers += container.store[RESOURCE_ENERGY];
+			}
+		}
+
+
 		// Create spawn request if certain requirements are met -------------------------------------------------------
-		if (workerCount < 2 || 								
-			(energyOnGround >= ENERGY_ON_GROUND_THRESHOLD && Game.time % 200 == 0) ||
-			energyOnGround >= ENERGY_ON_GROUND_THRESHOLD * 2) {
+		if (workerCount < 2 ||
+			energyInContainers >= containerCapacity / 2 ||	
+			energyOnGround >= ENERGY_ON_GROUND_THRESHOLD) {
 			// Get spawn requests for workers. We don't want to create another one ------------------------------------
 			const workerRequests: number = room.getSpawnRequests().filter((r) => r.role === 'worker').length;
 

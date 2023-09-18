@@ -186,6 +186,25 @@ export class Visuals {
 		const energyAvailable: number = room.energyAvailable;
 		const energyOnGround: number = _.sum(_.map(room.find(FIND_DROPPED_RESOURCES), (energy) => energy.amount));
 
+		const storage: StructureStorage[] = room.find(FIND_MY_STRUCTURES, {
+			filter: { structureType: STRUCTURE_STORAGE },
+		}) as unknown as StructureStorage[];
+		const containers: StructureContainer[] = room.find(FIND_STRUCTURES, {
+			filter: { structureType: STRUCTURE_CONTAINER },
+		}) as unknown as StructureContainer[];
+
+		let energyInStorage: number = 0;
+		if (storage.length != 0) {
+			energyInStorage = storage[0].store[RESOURCE_ENERGY]
+		}
+
+		let energyInContainers: number = 0;
+		if (containers.length != 0) {
+			for (const container of containers) {
+				energyInContainers += container.store[RESOURCE_ENERGY]
+			}
+		}
+
 		// Draw the box for the room information ----------------------------------------------------------------------
 		const roomInformation: RoomVisual = new RoomVisual(room.name);
 		roomInformation.box(pos.x, pos.y, PANEL_WIDTH, 6.2, { opacity: OPACITY_BOXES });
@@ -194,11 +213,15 @@ export class Visuals {
 		// Fill the box with labels (aka. text) -----------------------------------------------------------------------
 		roomInformation.text('Room info', pos.x + 0.2, pos.y + 0.75, styleHeading);
 		roomInformation.text('NRG available', pos.x + 0.2, pos.y + 1.75, styleLabels);
-		roomInformation.text('NRG on ground', pos.x + 0.2, pos.y + 2.75, styleLabels)
+		roomInformation.text('NRG storage', pos.x + 0.2, pos.y + 2.75, styleLabels);
+		roomInformation.text('NRG container', pos.x + 0.2, pos.y + 3.75, styleLabels);
+		roomInformation.text('NRG on ground', pos.x + 0.2, pos.y + 4.75, styleLabels);
 
 		// Fill the box with dynamic information ----------------------------------------------------------------------
-		roomInformation.text(energyAvailable.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 1.75, styleValues)
-		roomInformation.text(energyOnGround.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 2.75, styleValues)
+		roomInformation.text(energyAvailable.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 1.75, styleValues);
+		roomInformation.text(energyInStorage.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 2.75, styleValues);
+		roomInformation.text(energyInContainers.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 3.75, styleValues);
+		roomInformation.text(energyOnGround.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 4.75, styleValues);
 
 
 	}

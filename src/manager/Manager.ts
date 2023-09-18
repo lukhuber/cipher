@@ -1,4 +1,5 @@
 import { SpawnRequest, TransportRequest, UpgradeRequest, BuildRequest } from '.././request/Request';
+import { ENERGY_ON_GROUND_THRESHOLD } from '.././settings';
 
 // The Manager is responsible for creating all requests, which the Supervisor will then assign to creeps ##############
 export class Manager {
@@ -131,11 +132,15 @@ export class Manager {
 		}
 	}
 
-	// Very rudimentary system to always have two workers. Will be replaced with a much smarter solution :) ===========
+	// Makes sure to always have at least 2 workers. More workers will be spawed, if energy permits it ================
 	private static manageWorkerCount(room: Room): void {
 		const workerCount: number = room.getCreepsByRole('worker').length;
+		const energyOnGround: number = _.sum(_.map(room.find(FIND_DROPPED_RESOURCES), (energy) => energy.amount));
 
-		if (workerCount < 2) {
+		// Create spawn request if certain requirements are met -------------------------------------------------------
+		if (workerCount < 2 || 								
+			(energyOnGround >= ENERGY_ON_GROUND_THRESHOLD && Game.time % 200 == 0) ||
+			energyOnGround >= ENERGY_ON_GROUND_THRESHOLD * 2) {
 			// Get spawn requests for workers. We don't want to create another one ------------------------------------
 			const workerRequests: number = room.getSpawnRequests().filter((r) => r.role === 'worker').length;
 
@@ -224,8 +229,6 @@ export class Manager {
 			// Update 'neededEnergy' of all Requests ------------------------------------------------------------------
 			r.neededEnergy = target.store.getFreeCapacity(RESOURCE_ENERGY);
 		}
-
-
 	}
 
 	// If a construction site has no request yet, this function will create a BuildRequest ============================

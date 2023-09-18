@@ -11,3 +11,6 @@ export enum REQUEST_PRIORITIES {
     BUILD_REQUEST = 1,
     TRANSPORT_REQUEST = 2,
 }
+
+// Threshold after which more workers will be spawned
+export const ENERGY_ON_GROUND_THRESHOLD: number = 1000

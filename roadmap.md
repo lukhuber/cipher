@@ -6,6 +6,7 @@ This is a incomplete list of all the features I want to include into a specific 
 
 ## v0.0.5
 - Logic to use containers at mining sites
+- Implement transporters
 
 ## v0.0.6
 - Set sign in every occupied room

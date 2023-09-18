@@ -192,6 +192,7 @@ export class Manager {
 				const transportRequest: TransportRequest = new TransportRequest(s.id, RESOURCE_ENERGY);
 				if (!existingRequests.some((r) => r.targetId === transportRequest.targetId)) {
 					room.memory.Requests.push(transportRequest);
+					room.setFullCreepsToIdle(); // Full creeps travelling elsewhere should fill instead
 				}
 			}
 		}

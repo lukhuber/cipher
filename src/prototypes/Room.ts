@@ -98,3 +98,14 @@ Room.prototype.getRefuelTargetId = function (): Id<_HasId> | undefined {
   } 
   return targetId;
 };
+
+Room.prototype.setFullCreepsToIdle = function (): void {
+  const fullCreeps: Creep[] = _.filter(this.getCreepsByRole("worker"), 
+                                  function(creep) {
+                                    return creep.store.getFreeCapacity(RESOURCE_ENERGY) == 0
+                                  });
+
+  for (const creep of fullCreeps) {
+    creep.memory.isIdle = true;
+  }
+}

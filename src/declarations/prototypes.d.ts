@@ -17,6 +17,7 @@ interface Room {
 	getRefuelStation(): Id<_HasId> | undefined;
 	getDroppedEnergy(): Id<_HasId> | undefinded;
 	getRefuelTargetId(): ID<_HadId> | undefined;
+	setFullCreepsToIdle(): void;
 }
 
 interface Creep {

@@ -3,7 +3,6 @@ This is a incomplete list of all the features I want to include into a specific 
 
 ## v0.0.4
 - Intelligent worker count management
-- BUG REMOVAL: Harvester throwing error on its first tick
 
 ## v0.0.5
 - Logic to use containers at mining sites
@@ -14,6 +13,7 @@ This is a incomplete list of all the features I want to include into a specific 
 
 ## v0.1.0
 - Full automatic bunker planning and building for the first room
+- BUG REMOVAL: Harvester throwing error on its first tick
 
 ## v0.2.0
 - Scouting and harvesting neighbouring rooms

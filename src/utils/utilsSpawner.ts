@@ -65,6 +65,19 @@ function getWorkerParts(room: Room): BodyPartConstant[] {
     return parts
 }
 
+function getTransporterParts(room: Room): BodyPartConstant[] {
+    let energyAvailable: number = room.energyAvailable
+    const partsCosts: number = 100 // Represents cost of CARRY, MOVE
+    const parts: BodyPartConstant[] = []
+
+    for (; energyAvailable >= partsCosts; energyAvailable -= partsCosts) {
+        parts.push(CARRY)
+        parts.push(MOVE)
+    }
+
+    return parts
+}
+
 export function getBodyParts(role: string | undefined, room: Room): BodyPartConstant[] {
     switch (role) {
         case 'harvester':
@@ -73,6 +86,8 @@ export function getBodyParts(role: string | undefined, room: Room): BodyPartCons
             return getUpgraderParts(room)
         case 'worker':
             return getWorkerParts(room)
+        case 'transporter':
+            return getTransporterParts(room)
         default:
             return [WORK, CARRY, MOVE, MOVE]
     }

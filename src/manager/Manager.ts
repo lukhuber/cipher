@@ -13,6 +13,7 @@ export class Manager {
 		Manager.monitorMiningSites(room);			// Makes sure, that each source has a Harvester
 		Manager.monitorUpgradeSite(room);			// Makes sure, that one Upgrader is always available
 		Manager.manageWorkerCount(room);			// Creates spawn requests for workers, depending on available energy
+		Manager.manageTransporterCount(room);		// Creates spawn requests for transporter. Always 2
 		Manager.createTransportRequests(room);		// Creates transport requests to fill energy sinks/storages
 		Manager.updateTransportRequests(room);		// Checks and adjusts existing transport requests
 		Manager.createBuildRequests(room);			// Creates building requets for each construction site
@@ -150,10 +151,9 @@ export class Manager {
 			}
 		}
 
-
 		// Create spawn request if certain requirements are met -------------------------------------------------------
 		if (workerCount < 2 ||
-			energyInContainers >= containerCapacity / 2 ||	
+			energyInContainers > containerCapacity / 2 ||	
 			energyOnGround >= ENERGY_ON_GROUND_THRESHOLD) {
 			// Get spawn requests for workers. We don't want to create another one ------------------------------------
 			const workerRequests: number = room.getSpawnRequests().filter((r) => r.role === 'worker').length;
@@ -171,6 +171,43 @@ export class Manager {
 			// Create request, if no workers is spawning and no request is pending ------------------------------------
 			if (workerRequests === 0 && workerSpawning === 0) {
 				const spawnRequest: SpawnRequest = new SpawnRequest(4, 'worker');
+				room.memory.Requests.push(spawnRequest);
+			}
+		}
+	}
+
+	// Make sure to always have 2 tranporters =========================================================================
+	private static manageTransporterCount(room: Room): void {
+		const controller: StructureController | undefined = room.controller;
+
+		if (room.controller == undefined || room.controller.level < 2) { 	// We don't need transporters prior level 2
+			return
+		}
+
+		const transporterCount: number = room.getCreepsByRole('transporter').length;
+
+		if (transporterCount < 2) {
+			// Get spawn requests for transporters. We don't want to create another one -------------------------------
+			const transporterRequests: number = room.getSpawnRequests().filter((r) => r.role === 'transporter').length;
+
+			// Get spawns spawning transporters. We don't want to create a request, if a transporter is spawning ------
+			const spawns: StructureSpawn[] = room.find(FIND_MY_SPAWNS);
+			let transporterSpawning: number = 0;
+			for (const s of spawns) {
+				const spawn: StructureSpawn = Game.spawns[s.name];
+				if (spawn.spawning && spawn.spawning.name.includes('transporter')) {
+					transporterSpawning += 1;
+				}
+			}
+
+			const workerCount: number = room.getCreepsByRole('worker').length;
+
+			// This makes sure, that at least one worker and one transporter are spawned, instead of only workers -----
+			const priority: number = workerCount >= 1 && transporterCount == 0 ? 5 : 2;
+
+			// Create request, if no transporter is spawning and no request is pending --------------------------------
+			if (transporterRequests === 0 && transporterSpawning === 0) {
+				const spawnRequest: SpawnRequest = new SpawnRequest(priority, 'transporter');
 				room.memory.Requests.push(spawnRequest);
 			}
 		}

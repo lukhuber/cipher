@@ -54,6 +54,7 @@ export class Supervisor {
 
 		const upgraders: Creep[] = room.getCreepsByRole('upgrader');
 		const workers: Creep[] = room.getCreepsByRole('worker');
+		const transporters: Creep[] = room.getCreepsByRole('transporter');
 
 		// Assign the obligatory upgradeRequest of each room to all upgraders -----------------------------------------
 		for (const u of upgraders) {
@@ -66,6 +67,16 @@ export class Supervisor {
 			upgradeRequest[0].assignedCreeps.push([u.name, currentEnergy])
 			upgradeRequest[0].outboundEnergy += currentEnergy;
 			u.memory.isIdle = false
+		}
+
+		// Assign only transport requests to transporters -------------------------------------------------------------
+		for (const t of transporters) {
+			if (!t.memory.isIdle || t.store.getUsedCapacity() === 0) {	// Skip this creep, if he isn't idle or empty
+				continue;
+			}
+
+			const transportRequests: Request[] = room.getRequestsByType('transport');
+
 		}
 
 		// Assign the top most Request to the next worker, if that Request is not yet satisfied by other workers ------
@@ -92,6 +103,32 @@ export class Supervisor {
 				upgradeRequest[0].assignedCreeps.push([w.name, currentEnergy])
 				upgradeRequest[0].outboundEnergy += currentEnergy;
 				w.memory.isIdle = false
+			}
+		}
+
+		if (workers.length > 0) {	// Skip the rest if workers are present.
+			return
+		}
+
+		const harvesters: Creep[] = room.getCreepsByRole('harvester');
+
+		// If no workers are present harvesters should do transport requests
+		for (const h of harvesters) {
+			if (!h.memory.isIdle || h.store.getFreeCapacity() != 0) {	// Skip this creep, if it's empty
+				continue;
+			}
+
+			const transportRequests: Request[] = room.getRequestsByType('transport');
+
+			for (const t of transportRequests) {
+				if (t.outboundEnergy < t.neededEnergy) {
+					const currentEnergy: number = h.store.getUsedCapacity(RESOURCE_ENERGY);
+
+					t.assignedCreeps.push([h.name, currentEnergy]);
+					t.outboundEnergy += currentEnergy;
+					h.memory.isIdle = false;
+					break;
+				}
 			}
 		}
 	}
@@ -133,18 +170,12 @@ export class Supervisor {
 
 		for (const h of harvesters) {
 			// When no worker is available, fill spawn when creep is full ---------------------------------------------
-			if (!workerIsAvailable && h.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
-				const spawn = h.room.find(FIND_MY_SPAWNS, {
-					filter: (s) => {
-						return s.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-					},
-				})[0];
-				h.fillSpawn(spawn);
+			if (!workerIsAvailable && h.store.getFreeCapacity() === 0) {
 				continue;
 			}
 
 			h.harvestSource();
-			h.memory.isIdle = false;
+			h.memory.isIdle = true;
 		}
 	}
 

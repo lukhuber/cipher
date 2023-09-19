@@ -185,8 +185,13 @@ export class Manager {
 		}
 
 		const transporterCount: number = room.getCreepsByRole('transporter').length;
+		const controllerCount: number = room.find(FIND_STRUCTURES, {
+			filter: { structureType: STRUCTURE_CONTAINER },}).length;
+		const controllerConstructionCount: number = room.find(FIND_MY_CONSTRUCTION_SITES, { 
+			filter: { structureType: STRUCTURE_CONTAINER },}).length;
 
-		if (transporterCount < 2) {
+		// We make sure, that all containers are finised building -----------------------------------------------------
+		if (transporterCount < 2 && controllerCount > 0 && controllerConstructionCount === 0) {
 			// Get spawn requests for transporters. We don't want to create another one -------------------------------
 			const transporterRequests: number = room.getSpawnRequests().filter((r) => r.role === 'transporter').length;
 

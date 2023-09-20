@@ -49,7 +49,7 @@ export class Manager {
 
 		// Stores the ID of the bunker container (later the storage) in the rooms memory ------------------------------
 		if (!room.memory.storage) {
-			const storagePos: RoomPosition = new RoomPosition(bunkerAnchor.pos.x - 1, bunkerAnchor.pos.y, room.name) // Hardcoded, I know -.-
+			const storagePos: RoomPosition = new RoomPosition(bunkerAnchor.pos.x + 1, bunkerAnchor.pos.y, room.name) // Hardcoded, I know -.-
 			const storage: Structure[] = storagePos.lookFor(LOOK_STRUCTURES);
 
 			if (storage.length) {

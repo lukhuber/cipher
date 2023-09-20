@@ -40,7 +40,7 @@ export function updateBunkerRCL2(room: Room, anchorPos: RoomPosition): void {
 
   if (controller.level < 4) {	// Don't place this container anymore, once level 4 is reached
 			room.createConstructionSite(
-  		anchorPos.x + -1,
+  		anchorPos.x + 1,
   		anchorPos.y + 0,
   		STRUCTURE_CONTAINER);
   }

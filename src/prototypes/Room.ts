@@ -91,21 +91,26 @@ Room.prototype.getRefuelTargetId = function (): Id<_HasId> | undefined {
   }
   let storageEnergy: number = 0;
   if (storage.length > 0) {
-    storageEnergy = _.max(containers, function (c) { return c.store.getUsedCapacity(); }).store.getUsedCapacity(RESOURCE_ENERGY);
+    storageEnergy = _.max(storage, function (c) { return c.store.getUsedCapacity(); }).store.getUsedCapacity(RESOURCE_ENERGY);
+  }
+  let droppedEnergyAmount: number = 0;
+  if (droppedEnergy.length > 0) {
+    droppedEnergyAmount = _.max(droppedEnergy, "amount").amount;
   }
   // QUICK AND DIRTY END
 
   if (storage.length > 0 && storageEnergy > 0) {
-    // If a storage is built, we want to return that
-    targetId = storage[0].id;
-  } else if (containers.length > 0 && containerEnergy > 0) {
-    // Else we return the container with the most energy in it
-    targetId = _.max(containers, function (c) {
-      return c.store.getUsedCapacity();
-    }).id;
+      // If a storage is built, we want to return that
+      targetId = storage[0].id;
+  } else if (containers.length > 0 && containerEnergy > 0 && containerEnergy > droppedEnergyAmount) {
+      // Else we return the container with the most energy in it
+      targetId = _.max(containers, function (c) {
+          return c.store.getUsedCapacity();
+      }).id;
   } else if (droppedEnergy.length > 0) {
-    targetId = _.max(droppedEnergy, "amount").id;
+      targetId = _.max(droppedEnergy, "amount").id;
   } 
+
   return targetId;
 };
 

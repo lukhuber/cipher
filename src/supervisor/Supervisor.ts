@@ -20,13 +20,42 @@ export class Supervisor {
 	// All creeps completely emtpy and set to idle are filled, before a new Request is assigned to them ===============
 	private static refuelIdleCreeps(room: Room): void {
 		const creeps: Creep[] = room.getCreeps();
+		const buildRequestCount: number = room.getRequestsByType('build').length;
+		const transportRequestCount: number = room.getRequestsByType('transport').length;
+		const transporterPresent: boolean = room.getCreepsByRole('transporter').length > 0 ? true : false;
 
 		for (const creep of creeps) {
 			// Skip creep if he has something to do or is not completely empty ----------------------------------------
 			// We also want to skip transporters, as they have their own logic
-			if (!creep.memory.isIdle || creep.store.getUsedCapacity() != 0 || creep.memory.role === 'transporter') {
+			if (!creep.memory.isIdle || 
+				creep.store.getUsedCapacity() != 0 || 
+				creep.memory.role === 'transporter') {
 				delete creep.memory.refuelTargetId;
 				continue;
+			}
+
+			// If the target is empty, we want to delete it -----------------------------------------------------------
+			if (creep.memory.refuelTargetId) {
+				const target = Game.getObjectById(creep.memory.refuelTargetId)
+				if (target instanceof StructureContainer || 
+					target instanceof StructureStorage && 
+					target.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
+					delete creep.memory.refuelTargetId
+				}
+			}
+
+			// Upgrade should use the upgrade container if possible ---------------------------------------------------
+			if (creep.memory.role === 'upgrader' && room.memory.containersBuilt && transporterPresent) {
+				creep.memory.refuelTargetId = room.memory.upgradeContainer;
+			}
+
+			// Workers should refuel at the storage when not upgrading ------------------------------------------------
+			if (creep.memory.role === 'worker' && room.memory.containersBuilt && transporterPresent) {
+				if (buildRequestCount > 0 || transportRequestCount > 0) {
+					creep.memory.refuelTargetId = room.memory.storage;
+				} else {
+					creep.memory.refuelTargetId = room.memory.upgradeContainer;
+				}
 			}
 
 			// In case the target (dropped energy) has vanished it needs to be removed --------------------------------
@@ -63,6 +92,7 @@ export class Supervisor {
 
 		requests.splice(firstBuildRequestIndex, temp.length, ...temp);
 
+		// Get number of current creeps in each role for later use ----------------------------------------------------
 		const upgraders: Creep[] = room.getCreepsByRole('upgrader');
 		const workers: Creep[] = room.getCreepsByRole('worker');
 		const transporters: Creep[] = room.getCreepsByRole('transporter');
@@ -78,16 +108,6 @@ export class Supervisor {
 			upgradeRequest[0].assignedCreeps.push([u.name, currentEnergy])
 			upgradeRequest[0].outboundEnergy += currentEnergy;
 			u.memory.isIdle = false
-		}
-
-		// Assign only transport requests to transporters -------------------------------------------------------------
-		for (const t of transporters) {
-			if (!t.memory.isIdle || t.store.getUsedCapacity() === 0) {	// Skip this creep, if he isn't idle or empty
-				continue;
-			}
-
-			const transportRequests: Request[] = room.getRequestsByType('transport');
-
 		}
 
 		// Assign the top most Request to the next worker, if that Request is not yet satisfied by other workers ------
@@ -191,9 +211,21 @@ export class Supervisor {
 
 	private static driveTransporters(room: Room): void {
 		const transporters: Creep[] = room.getCreepsByRole('transporter');
+
+		const storage: StructureStorage | StructureContainer = Game.getObjectById(room.memory.storage);
+		let storageLevel: number = 0;
+
+		const upgradeContainer: StructureContainer = Game.getObjectById(room.memory.upgradeContainer);
+		let upgradeContainerLevel: number = 0;
+
+		if (storage && upgradeContainer) {
+			storageLevel = storage.store.getUsedCapacity(RESOURCE_ENERGY);
+			upgradeContainerLevel = upgradeContainer.store.getUsedCapacity(RESOURCE_ENERGY);
+		}
+
 		const miningContainers = new Array<StructureContainer>;
 
-		// Prepare Array for later use
+		// Get mining containers in an array, to send the transporter to refueling there
 		for (const id of room.memory.miningContainers) {
 		    if (id) {
 		        const container = Game.getObjectById(id);
@@ -205,16 +237,30 @@ export class Supervisor {
 		}
 
 		for (const t of transporters) {
-			// Refill at mining sites
+			// If the transporter is empty, it should refuel at the mining containers ---------------------------------
 			if (t.store.getUsedCapacity() === 0) {
-				t.memory.isIdle = true;
-			}
 
-			if (t.memory.isIdle) {
-				const target = _.max(miningContainers,  function (c) {
-      				return c.store.getUsedCapacity(); });
-				if(t.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+				if (!t.memory.refuelTargetId) {
+					const refuelTarget = _.max(miningContainers,  function (c) {
+	      				return c.store.getUsedCapacity(); });
+					t.memory.refuelTargetId = refuelTarget.id;
+				}
+				const target = Game.getObjectById(t.memory.refuelTargetId);
+
+				if (t.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
 		    		t.moveTo(target);
+
+				}
+			// If the transporter in not empty, it should fill storage to at least 1000, else fill upgrade container --
+			} else if (t.store.getUsedCapacity() != 0 && storageLevel < 1500) {
+				delete t.memory.refuelTargetId;
+				if (t.transfer(storage, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE ) {
+					t.moveTo(storage)
+				}
+			} else if (t.store.getUsedCapacity() != 0) {
+				delete t.memory.refuelTargetId;
+				if (t.transfer(upgradeContainer, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE ) {
+					t.moveTo(upgradeContainer)
 				}
 			}
 		}

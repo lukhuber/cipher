@@ -4,6 +4,7 @@ import { ENERGY_ON_GROUND_THRESHOLD, BUILD_PRIORITIES } from '.././settings';
 // The Manager is responsible for creating all requests, which the Supervisor will then assign to creeps ##############
 export class Manager {
 	static init(room: Room): void {
+		Manager.assessRoomState(room);				// Sets flags in room memory according to room status
 		Manager.assignContainerRole(room);			// Establishes difference between mining site containers and others
 	}
 
@@ -18,6 +19,17 @@ export class Manager {
 		Manager.updateTransportRequests(room);		// Checks and adjusts existing transport requests
 		Manager.createBuildRequests(room);			// Creates building requets for each construction site
 		Manager.updateBuildRequests(room);			// Delete finished constructions from the requestlist
+	}
+
+	// There are several flags in room memory, which indicate room status. This function sets them ====================
+	private static assessRoomState(room: Room): void {
+		// Check if all containers in this room are built -------------------------------------------------------------
+		const containerCount: number = room.find(FIND_STRUCTURES, {
+			filter: { structureType: STRUCTURE_CONTAINER },}).length;
+		const containerConstructionCount: number = room.find(FIND_MY_CONSTRUCTION_SITES, { 
+			filter: { structureType: STRUCTURE_CONTAINER },}).length;
+
+		room.memory.containersBuilt = containerCount > 0 && containerConstructionCount === 0 ? true : false;
 	}
 
 	// We need the information which container is which, since we want to transport from mining site to somewhere else
@@ -191,8 +203,8 @@ export class Manager {
 
 		// Create spawn request if certain requirements are met -------------------------------------------------------
 		if (workerCount < 2 ||
-			energyInContainers > containerCapacity / 3 ||	
-			energyOnGround >= ENERGY_ON_GROUND_THRESHOLD) {
+			energyInContainers > containerCapacity / 1.5 ||	
+			(!room.memory.containersBuilt && energyOnGround >= ENERGY_ON_GROUND_THRESHOLD)) {
 			// Get spawn requests for workers. We don't want to create another one ------------------------------------
 			const workerRequests: number = room.getSpawnRequests().filter((r) => r.role === 'worker').length;
 
@@ -223,13 +235,9 @@ export class Manager {
 		}
 
 		const transporterCount: number = room.getCreepsByRole('transporter').length;
-		const controllerCount: number = room.find(FIND_STRUCTURES, {
-			filter: { structureType: STRUCTURE_CONTAINER },}).length;
-		const controllerConstructionCount: number = room.find(FIND_MY_CONSTRUCTION_SITES, { 
-			filter: { structureType: STRUCTURE_CONTAINER },}).length;
 
 		// We make sure, that all containers are finised building -----------------------------------------------------
-		if (transporterCount < 2 && controllerCount > 0 && controllerConstructionCount === 0) {
+		if (transporterCount < 3 && room.memory.containersBuilt) {
 			// Get spawn requests for transporters. We don't want to create another one -------------------------------
 			const transporterRequests: number = room.getSpawnRequests().filter((r) => r.role === 'transporter').length;
 
@@ -246,7 +254,7 @@ export class Manager {
 			const workerCount: number = room.getCreepsByRole('worker').length;
 
 			// This makes sure, that at least one worker and one transporter are spawned, instead of only workers -----
-			const priority: number = workerCount >= 1 && transporterCount == 0 ? 5 : 2;
+			const priority: number = workerCount < 2 ? 2 : 5;
 
 			// Create request, if no transporter is spawning and no request is pending --------------------------------
 			if (transporterRequests === 0 && transporterSpawning === 0) {

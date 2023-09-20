@@ -4,5 +4,6 @@ export class Memory {
 		room.memory.Requests = new Array<Request>();			// Array used to store all requests of this room
 		room.memory.Tasks = new Array<Task>();					// Array used to store all tasks of this room
 		room.memory.miningContainers = new Array<Id<_HasId>>; 	// Array used to store the ID of mining containers
+		room.memory.containersBuilt = false;					// Flag to track if containers are all built
 	}
 }

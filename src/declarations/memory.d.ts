@@ -6,6 +6,7 @@ interface RoomMemory {
 	upgradeContainer: Id<_HadId>;
 	miningContainers: Id<_HadId>[];
 	storage: Id<_HadId>;
+	containersBuilt: boolean;
 }
 
 interface FlagMemory {

@@ -74,7 +74,7 @@ export class Architect {
 			// @ts-ignore: Object is possibly 'null'.
 			const spawn: StructureSpawn = controller.pos.findClosestByPath(FIND_MY_SPAWNS);
 			const path: PathStep[] = controller.pos.findPathTo(spawn);
-			const flagPos: RoomPosition = new RoomPosition(path[1].x, path[1].y, room.name);
+			const flagPos: RoomPosition = new RoomPosition(path[2].x, path[2].y, room.name);
 
 			flagPos.createFlag(room.name + ' upgrade site');
 		}

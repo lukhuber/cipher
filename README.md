@@ -54,3 +54,4 @@ These feature are not in any particular order, but represent a simple TODO list 
 - Harvesters throw an error during their very first tick, as mining site is not yet assigned
 - The very first upgrader in each room doesn't move as no energy is available to it
 - Full creeps on their way to upgrade are not deleted from the upgrade request list, when they are diverted to fill the room
+- Build requests are not ordered correctly in visual display

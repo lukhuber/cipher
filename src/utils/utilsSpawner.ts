@@ -88,6 +88,8 @@ export function getBodyParts(role: string | undefined, room: Room): BodyPartCons
             return getWorkerParts(room)
         case 'transporter':
             return getTransporterParts(room)
+        case 'janitor':
+            return getTransporterParts(room)
         default:
             return [WORK, CARRY, MOVE, MOVE]
     }

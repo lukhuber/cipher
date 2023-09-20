@@ -54,4 +54,4 @@ type Roles =
 	| 'worker'
 	| 'upgrader'
 	| 'transporter'
-	| 'queen';
+	| 'janitor';

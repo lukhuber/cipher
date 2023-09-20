@@ -14,6 +14,7 @@ export class Supervisor {
 		Supervisor.doSpawnRequests(room);		// Execute pending SpawnRequests from Manager
 		Supervisor.driveHarvesters(room); 		// Makes the harvesters go mining sources
 		Supervisor.driveTransporters(room);		// Transport energy away from mining sites to where it's needed
+		Supervisor.driveJanitors(room);			// Makes sure, that spawn + extensions are filled
 		Supervisor.runTasks(room);				// Cycles through all creeps of this room and run their tasks
 	}
 
@@ -26,10 +27,11 @@ export class Supervisor {
 
 		for (const creep of creeps) {
 			// Skip creep if he has something to do or is not completely empty ----------------------------------------
-			// We also want to skip transporters, as they have their own logic
+			// We also want to skip transporters and janitors, as they have their own logic
 			if (!creep.memory.isIdle || 
 				creep.store.getUsedCapacity() != 0 || 
-				creep.memory.role === 'transporter') {
+				creep.memory.role === 'transporter' ||
+				creep.memory.role === 'janitor') {
 				delete creep.memory.refuelTargetId;
 				continue;
 			}
@@ -91,6 +93,11 @@ export class Supervisor {
 		const firstBuildRequestIndex: number = requests.indexOf(firstBuildRequest);
 
 		requests.splice(firstBuildRequestIndex, temp.length, ...temp);
+
+		// If a janitor is present, we don't want workers to do transport requests ------------------------------------
+		if (room.memory.janitorPresent) {
+			requests = requests.filter(r => r.type != 'transport');
+		}
 
 		// Get number of current creeps in each role for later use ----------------------------------------------------
 		const upgraders: Creep[] = room.getCreepsByRole('upgrader');
@@ -239,7 +246,6 @@ export class Supervisor {
 		for (const t of transporters) {
 			// If the transporter is empty, it should refuel at the mining containers ---------------------------------
 			if (t.store.getUsedCapacity() === 0) {
-
 				if (!t.memory.refuelTargetId) {
 					const refuelTarget = _.max(miningContainers,  function (c) {
 	      				return c.store.getUsedCapacity(); });
@@ -248,9 +254,9 @@ export class Supervisor {
 				const target = Game.getObjectById(t.memory.refuelTargetId);
 
 				if (t.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-		    		t.moveTo(target);
-
+		    		t.moveTo(target)
 				}
+
 			// If the transporter in not empty, it should fill storage to at least 1000, else fill upgrade container --
 			} else if (t.store.getUsedCapacity() != 0 && storageLevel < 1500) {
 				delete t.memory.refuelTargetId;
@@ -261,6 +267,49 @@ export class Supervisor {
 				delete t.memory.refuelTargetId;
 				if (t.transfer(upgradeContainer, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE ) {
 					t.moveTo(upgradeContainer)
+				}
+			}
+		}
+	}
+
+	private static driveJanitors(room: Room): void {
+		const janitors: Creep[] = room.getCreepsByRole('janitor');
+		const storage = Game.getObjectById(room.memory.storage);
+		const transportRequests: Request[] = room.getRequestsByType('transport').reverse();
+
+		for (const j of janitors) {
+			// Refill janitor, if it's empty and break the loop -------------------------------------------------------
+			if (j.store.getUsedCapacity() === 0) {
+				j.memory.isIdle = true;
+				if (j.withdraw(storage, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+		    		j.moveTo(storage)
+				}
+				continue;
+			}
+
+			// If the janitor has nothing to do, it should refill itself ----------------------------------------------
+			if (transportRequests.length === 0) {
+				j.memory.isIdle = true;
+
+				if (j.withdraw(storage, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+		    		j.moveTo(storage)
+				}
+			}
+
+			// Skip at this point, if it's not idle, since we don't want to assign it to multiple requests ------------
+			if (!j.memory.isIdle || j.store.getUsedCapacity() === 0) {
+				continue;
+			}
+
+			// Assign the next transport request to the janitor -------------------------------------------------------
+			for (const request of transportRequests) {
+				if (request.outboundEnergy < request.neededEnergy) {
+					const currentEnergy: number = j.store.getUsedCapacity(RESOURCE_ENERGY);
+
+					request.assignedCreeps.push([j.name, currentEnergy]);
+					request.outboundEnergy += currentEnergy;
+					j.memory.isIdle = false;
+					break;
 				}
 			}
 		}

@@ -7,6 +7,7 @@ interface RoomMemory {
 	miningContainers: Id<_HadId>[];
 	storage: Id<_HadId>;
 	containersBuilt: boolean;
+	janitorPresent: boolean;
 }
 
 interface FlagMemory {

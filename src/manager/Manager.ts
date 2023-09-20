@@ -13,8 +13,11 @@ export class Manager {
 		Manager.createPermanentRequests(room);		// Adds permanent Requests (i.e. UpgradeController)
 		Manager.monitorMiningSites(room);			// Makes sure, that each source has a Harvester
 		Manager.monitorUpgradeSite(room);			// Makes sure, that one Upgrader is always available
+
 		Manager.manageWorkerCount(room);			// Creates spawn requests for workers, depending on available energy
 		Manager.manageTransporterCount(room);		// Creates spawn requests for transporter. Always 2
+		Manager.manageJanitorCount(room);			// Creates spawn requests for janitor. Always 1
+
 		Manager.createTransportRequests(room);		// Creates transport requests to fill energy sinks/storages
 		Manager.updateTransportRequests(room);		// Checks and adjusts existing transport requests
 		Manager.createBuildRequests(room);			// Creates building requets for each construction site
@@ -30,6 +33,11 @@ export class Manager {
 			filter: { structureType: STRUCTURE_CONTAINER },}).length;
 
 		room.memory.containersBuilt = containerCount > 0 && containerConstructionCount === 0 ? true : false;
+
+		// Check if janitor is present --------------------------------------------------------------------------------
+		const janitorPresent: boolean = room.getCreepsByRole('janitor').length > 0 ? true : false;
+
+		room.memory.janitorPresent = janitorPresent ? true : false
 	}
 
 	// We need the information which container is which, since we want to transport from mining site to somewhere else
@@ -267,6 +275,38 @@ export class Manager {
 			// Create request, if no transporter is spawning and no request is pending --------------------------------
 			if (transporterRequests === 0 && transporterSpawning === 0) {
 				const spawnRequest: SpawnRequest = new SpawnRequest(priority, 'transporter');
+				room.memory.Requests.push(spawnRequest);
+			}
+		}
+	}
+
+	// Makes sure, that 1 janitor is always present. Will spawn 1 janitor 100 ticks before the other is dead ==========
+	private static manageJanitorCount(room: Room): void {
+		const janitor: Creep[] = room.getCreepsByRole('janitor');
+
+		if (janitor.length <= 1) {
+			// If the janitor has more than 100 ticks to live, skip spawn request creation ----------------------------
+			// @ts-ignore: Object is possibly 'null'.
+			if (janitor.length > 0 && janitor[0].ticksToLive > 100) {
+				return;
+			}
+
+			// Get spawn requests for janitors. We don't want to create another one -----------------------------------
+			const janitorRequests: number = room.getSpawnRequests().filter((r) => r.role === 'janitor').length;
+
+			// Get spawns spawning transporters. We don't want to create a request, if a janitor is spawning ----------
+			const spawns: StructureSpawn[] = room.find(FIND_MY_SPAWNS);
+			let janitorSpawning: number = 0;
+			for (const s of spawns) {
+				const spawn: StructureSpawn = Game.spawns[s.name];
+				if (spawn.spawning && spawn.spawning.name.includes('janitor')) {
+					janitorSpawning += 1;
+				}
+			}
+
+			// Create request, if no transporter is spawning and no request is pending --------------------------------
+			if (janitorRequests === 0 && janitorSpawning === 0) {
+				const spawnRequest: SpawnRequest = new SpawnRequest(9, 'janitor');
 				room.memory.Requests.push(spawnRequest);
 			}
 		}

@@ -107,7 +107,7 @@ export class Visuals {
 
 		// Fill the box with labels (aka. text) -----------------------------------------------------------------------
 		creepsStats.text(room.name + ' Creeps', pos.x + 0.2, pos.y + 0.75, styleHeading);
-		creepsStats.text('Queen', pos.x + 0.2, pos.y + 1.75, styleLabels);
+		creepsStats.text('Janitor', pos.x + 0.2, pos.y + 1.75, styleLabels);
 		creepsStats.text('Harvester', pos.x + 0.2, pos.y + 2.75, styleLabels);
 		creepsStats.text('Upgrader', pos.x + 0.2, pos.y + 3.75, styleLabels);
 		creepsStats.text('Worker', pos.x + 0.2, pos.y + 4.75, styleLabels);

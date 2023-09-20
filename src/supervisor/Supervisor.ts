@@ -53,8 +53,10 @@ export class Supervisor {
 
 			// Workers should refuel at the storage when not upgrading ------------------------------------------------
 			if (creep.memory.role === 'worker' && room.memory.containersBuilt && transporterPresent) {
-				if (buildRequestCount > 0 || transportRequestCount > 0) {
+				if (buildRequestCount > 0) {
 					creep.memory.refuelTargetId = room.memory.storage;
+				} else if (transportRequestCount > 0 && !room.memory.janitorPresent) {
+					creep.memory.refuelTargetId = room.memory.storage
 				} else {
 					creep.memory.refuelTargetId = room.memory.upgradeContainer;
 				}

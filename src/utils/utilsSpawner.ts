@@ -65,8 +65,24 @@ function getWorkerParts(room: Room): BodyPartConstant[] {
     return parts
 }
 
+function getJanitorParts(room: Room): BodyPartConstant[] {
+    let energyAvailable: number = room.energyAvailable
+    const partsCosts: number = 100 // Represents cost of CARRY, MOVE
+    const parts: BodyPartConstant[] = []
+
+    for (; energyAvailable >= partsCosts; energyAvailable -= partsCosts) {
+        parts.push(CARRY)
+        parts.push(MOVE)
+    }
+
+    return parts
+}
+
 function getTransporterParts(room: Room): BodyPartConstant[] {
     let energyAvailable: number = room.energyAvailable
+
+    // We limit the size of transporters. They should only carry 400 energy max.
+    energyAvailable = energyAvailable > 800 ? 800 : energyAvailable 
     const partsCosts: number = 100 // Represents cost of CARRY, MOVE
     const parts: BodyPartConstant[] = []
 
@@ -89,7 +105,7 @@ export function getBodyParts(role: string | undefined, room: Room): BodyPartCons
         case 'transporter':
             return getTransporterParts(room)
         case 'janitor':
-            return getTransporterParts(room)
+            return getJanitorParts(room)
         default:
             return [WORK, CARRY, MOVE, MOVE]
     }

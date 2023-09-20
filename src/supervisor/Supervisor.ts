@@ -57,11 +57,11 @@ export class Supervisor {
 			// energy to still fill spawn + extensions
 			const storageLevel: number = Game.getObjectById(room.memory.storage).store.getUsedCapacity(RESOURCE_ENERGY)
 			if (creep.memory.role === 'worker' && room.memory.containersBuilt && transporterPresent) {
-				if (buildRequestCount > 0 && storageLevel > 1500) {
+				if (buildRequestCount > 0 && storageLevel >= 1500) {
 					creep.memory.refuelTargetId = room.memory.storage;
 				} else if (transportRequestCount > 0 && !room.memory.janitorPresent && storageLevel > 1500) {
 					creep.memory.refuelTargetId = room.memory.storage;
-				} else if (buildRequestCount > 0 && storageLevel <= 1500) {	// Workers should not travel to upgrade ...
+				} else if (buildRequestCount > 0 && storageLevel < 1500) {	// Workers should not travel to upgrade ...
 					creep.cancelOrder('move');								// if there's something to build
 				} else {
 					creep.memory.refuelTargetId = room.memory.upgradeContainer;

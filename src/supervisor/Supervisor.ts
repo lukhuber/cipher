@@ -52,10 +52,13 @@ export class Supervisor {
 			}
 
 			// Workers should refuel at the storage when not upgrading ------------------------------------------------
+			// We make sure, that there is 1500 energy in storage, before taking it, so that the janitor has enough
+			// energy to still fill spawn + extensions
+			const storageLevel: number = Game.getObjectById(room.memory.storage).store.getUsedCapacity(RESOURCE_ENERGY)
 			if (creep.memory.role === 'worker' && room.memory.containersBuilt && transporterPresent) {
-				if (buildRequestCount > 0) {
+				if (buildRequestCount > 0 && storageLevel > 1500) {
 					creep.memory.refuelTargetId = room.memory.storage;
-				} else if (transportRequestCount > 0 && !room.memory.janitorPresent) {
+				} else if (transportRequestCount > 0 && !room.memory.janitorPresent && storageLevel > 1500) {
 					creep.memory.refuelTargetId = room.memory.storage
 				} else {
 					creep.memory.refuelTargetId = room.memory.upgradeContainer;
@@ -234,7 +237,7 @@ export class Supervisor {
 
 		const miningContainers = new Array<StructureContainer>;
 
-		// Get mining containers in an array, to send the transporter to refueling there
+		// Get mining containers in an array, to send the transporter to refuel there ---------------------------------
 		for (const id of room.memory.miningContainers) {
 		    if (id) {
 		        const container = Game.getObjectById(id);
@@ -249,6 +252,7 @@ export class Supervisor {
 			// If the transporter is empty, it should refuel at the mining containers ---------------------------------
 			if (t.store.getUsedCapacity() === 0) {
 				if (!t.memory.refuelTargetId) {
+					console.log(t.name, t.memory.refuelTargetId)
 					const refuelTarget = _.max(miningContainers,  function (c) {
 	      				return c.store.getUsedCapacity(); });
 					t.memory.refuelTargetId = refuelTarget.id;

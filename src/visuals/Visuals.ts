@@ -92,7 +92,7 @@ export class Visuals {
 
 		// Get current creep counts -----------------------------------------------------------------------------------
 		const currentHarvesters: number = room.getCreepsByRole('harvester').length
-		const currentQueens: number = room.getCreepsByRole('queen').length
+		const currentJanitors: number = room.getCreepsByRole('janitor').length
 		const currentUpgraders: number = room.getCreepsByRole('upgrader').length
 		const currentWorkers: number = room.getCreepsByRole('worker').length
 		const currentTransporters: number = room.getCreepsByRole('transporter').length
@@ -114,7 +114,7 @@ export class Visuals {
 		creepsStats.text('Transporter', pos.x + 0.2, pos.y + 5.75, styleLabels);
 
 		// Fill the box with current creep counts ---------------------------------------------------------------------
-		creepsStats.text(currentQueens.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 1.75, styleValues)
+		creepsStats.text(currentJanitors.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 1.75, styleValues)
 		creepsStats.text(currentHarvesters.toString() + ' / ' + neededHarvesters.toString(),
 										 pos.x + PANEL_WIDTH - 0.2, pos.y + 2.75, styleValues)
 		creepsStats.text(currentUpgraders.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 3.75, styleValues)
@@ -184,24 +184,23 @@ export class Visuals {
 
 		// Get current energy amounts ---------------------------------------------------------------------------------
 		const energyAvailable: number = room.energyAvailable;
+		
 		const energyOnGround: number = _.sum(_.map(room.find(FIND_DROPPED_RESOURCES), (energy) => energy.amount));
 
-		const storage: StructureStorage[] = room.find(FIND_MY_STRUCTURES, {
-			filter: { structureType: STRUCTURE_STORAGE },
-		}) as unknown as StructureStorage[];
-		const containers: StructureContainer[] = room.find(FIND_STRUCTURES, {
-			filter: { structureType: STRUCTURE_CONTAINER },
-		}) as unknown as StructureContainer[];
-
 		let energyInStorage: number = 0;
-		if (storage.length != 0) {
-			energyInStorage = storage[0].store[RESOURCE_ENERGY]
+		if (room.memory.storage) {
+			energyInStorage = Game.getObjectById(room.memory.storage).store.getUsedCapacity(RESOURCE_ENERGY);
 		}
 
-		let energyInContainers: number = 0;
-		if (containers.length != 0) {
-			for (const container of containers) {
-				energyInContainers += container.store[RESOURCE_ENERGY]
+		let energyInUpgradeContainer: number = 0
+		if (room.memory.upgradeContainer) {
+			energyInUpgradeContainer = Game.getObjectById(room.memory.upgradeContainer).store.getUsedCapacity(RESOURCE_ENERGY);
+		}
+
+		let energyInMiningContainers: number = 0
+		if (room.memory.miningContainers) {
+			for (const c of room.memory.miningContainers) {
+				energyInMiningContainers += Game.getObjectById(c).store.getUsedCapacity(RESOURCE_ENERGY);
 			}
 		}
 
@@ -212,16 +211,18 @@ export class Visuals {
 
 		// Fill the box with labels (aka. text) -----------------------------------------------------------------------
 		roomInformation.text('Room info', pos.x + 0.2, pos.y + 0.75, styleHeading);
-		roomInformation.text('NRG available', pos.x + 0.2, pos.y + 1.75, styleLabels);
+		roomInformation.text('NRG spawn+ext.', pos.x + 0.2, pos.y + 1.75, styleLabels);
 		roomInformation.text('NRG storage', pos.x + 0.2, pos.y + 2.75, styleLabels);
-		roomInformation.text('NRG container', pos.x + 0.2, pos.y + 3.75, styleLabels);
-		roomInformation.text('NRG on ground', pos.x + 0.2, pos.y + 4.75, styleLabels);
+		roomInformation.text('NRG upgrade', pos.x + 0.2, pos.y + 3.75, styleLabels);
+		roomInformation.text('NRG mining', pos.x + 0.2, pos.y + 4.75, styleLabels);
+		roomInformation.text('NRG on ground', pos.x + 0.2, pos.y + 5.75, styleLabels);
 
 		// Fill the box with dynamic information ----------------------------------------------------------------------
 		roomInformation.text(energyAvailable.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 1.75, styleValues);
 		roomInformation.text(energyInStorage.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 2.75, styleValues);
-		roomInformation.text(energyInContainers.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 3.75, styleValues);
-		roomInformation.text(energyOnGround.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 4.75, styleValues);
+		roomInformation.text(energyInUpgradeContainer.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 3.75, styleValues);
+		roomInformation.text(energyInMiningContainers.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 4.75, styleValues);
+		roomInformation.text(energyOnGround.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 5.75, styleValues);
 
 
 	}

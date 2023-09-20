@@ -236,8 +236,16 @@ export class Manager {
 
 		const transporterCount: number = room.getCreepsByRole('transporter').length;
 
-		// We make sure, that all containers are finised building -----------------------------------------------------
-		if (transporterCount < 3 && room.memory.containersBuilt) {
+		let energyInMiningContainers: number = 0;
+
+		if (room.memory.miningContainers) {
+			for (const c of room.memory.miningContainers) {
+				energyInMiningContainers += Game.getObjectById(c).store.getUsedCapacity(RESOURCE_ENERGY);
+			}
+		}
+
+		// We make also sure, that all containers are finised building ------------------------------------------------
+		if (room.memory.containersBuilt && transporterCount < 2 || energyInMiningContainers > 3000) {
 			// Get spawn requests for transporters. We don't want to create another one -------------------------------
 			const transporterRequests: number = room.getSpawnRequests().filter((r) => r.role === 'transporter').length;
 

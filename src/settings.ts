@@ -12,5 +12,13 @@ export enum REQUEST_PRIORITIES {
     TRANSPORT_REQUEST = 2,
 }
 
+// Priorities with which build requests get orderes within themselves
+export enum BUILD_PRIORITIES {
+    STRUCTURE_EXTENSION = 10,
+    STRUCTURE_TOWER     = 9,
+    STRUCTURE_STORAGE   = 8,
+    STRUCTURE_CONTAINER = 1,
+}
+
 // Threshold after which more workers will be spawned
 export const ENERGY_ON_GROUND_THRESHOLD: number = 1000

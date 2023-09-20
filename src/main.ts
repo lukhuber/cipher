@@ -40,12 +40,12 @@ export const loop = ErrorMapper.wrapLoop(() => {
 		if (!room.memory.isInitialized) {
 			Architect.init(room);								// Calc euclidean distance and place flags
 			Memory.init(room);									// Prepare memory for all entities in room
-			Manager.init(room);									// Currently not in use
 		}
 
 		// Check for new work and create requests ---------------------------------------------------------------------
 		if (room.memory.isInitialized) {
 		  Architect.run(room);									// Place construction sites
+		  Manager.init(room);									// Makes sure, that structures are assigned their role
 		  Manager.run(room);									// Create request for undone work
 		  Supervisor.init(room);								// Assign requests to creeps/spawns/towers/etc.
 		  Supervisor.run(room);									// Do the assigned requests

@@ -28,7 +28,7 @@ export function updateBunkerRCL2(room: Room, anchorPos: RoomPosition): void {
   }
 
   // Place the container at the upgrade side --------------------------------------------------------------------------
-  const upgradeSite: Flag = room.find(FIND_FLAGS, {filter: (f) => {return f.name.includes('upgrade');},})[0];
+  const upgradeSite: Flag = room.find(FIND_FLAGS, { filter: (f) => {return f.name.includes('upgrade'); },})[0];
   room.createConstructionSite(upgradeSite.pos, STRUCTURE_CONTAINER);
 
   // Place a container at the place where later a storage will be build -----------------------------------------------

@@ -11,9 +11,10 @@ export class Supervisor {
 	}
 
 	static run(room: Room): void {
-		Supervisor.doSpawnRequests(room);	// Execute pending SpawnRequests from Manager
-		Supervisor.driveHarvesters(room); 	// Makes the harvesters go mining sources
-		Supervisor.runTasks(room);			// Cycles through all creeps of this room and run their tasks
+		Supervisor.doSpawnRequests(room);		// Execute pending SpawnRequests from Manager
+		Supervisor.driveHarvesters(room); 		// Makes the harvesters go mining sources
+		Supervisor.driveTransporters(room);		// Transport energy away from mining sites to where it's needed
+		Supervisor.runTasks(room);				// Cycles through all creeps of this room and run their tasks
 	}
 
 	// All creeps completely emtpy and set to idle are filled, before a new Request is assigned to them ===============
@@ -22,7 +23,8 @@ export class Supervisor {
 
 		for (const creep of creeps) {
 			// Skip creep if he has something to do or is not completely empty ----------------------------------------
-			if (!creep.memory.isIdle || creep.store.getUsedCapacity() != 0) {
+			// We also want to skip transporters, as they have their own logic
+			if (!creep.memory.isIdle || creep.store.getUsedCapacity() != 0 || creep.memory.role === 'transporter') {
 				delete creep.memory.refuelTargetId;
 				continue;
 			}
@@ -52,10 +54,19 @@ export class Supervisor {
 		let requests: Request[] = room.getCreepRequests();
 		requests = _.sortBy(requests, 'priority').reverse();	// Sort request by priority
 
+		// Following code orders the subset of build requests of 'requests' depending on buildPriority ----------------
+		let temp: Request[] = Array.from(requests);		// Necessary, to not manipulate the original array 'requests'
+		temp = temp.filter(r => r.type === 'build').sort((a, b) => a.buildPriority - b.buildPriority).reverse();
+
+		const firstBuildRequest: Request = requests.find(r => r.type === 'build');
+		const firstBuildRequestIndex: number = requests.indexOf(firstBuildRequest);
+
+		requests.splice(firstBuildRequestIndex, temp.length, ...temp);
+
 		const upgraders: Creep[] = room.getCreepsByRole('upgrader');
 		const workers: Creep[] = room.getCreepsByRole('worker');
 		const transporters: Creep[] = room.getCreepsByRole('transporter');
-
+		
 		// Assign the obligatory upgradeRequest of each room to all upgraders -----------------------------------------
 		for (const u of upgraders) {
 			if (!u.memory.isIdle || u.store.getUsedCapacity() === 0) {	// Skip this creep, if he isn't idle or empty
@@ -112,12 +123,11 @@ export class Supervisor {
 
 		const harvesters: Creep[] = room.getCreepsByRole('harvester');
 
-		// If no workers are present harvesters should do transport requests
+		// If no workers are present harvesters should do transport requests ------------------------------------------
 		for (const h of harvesters) {
-			if (!h.memory.isIdle || h.store.getFreeCapacity() != 0) {	// Skip this creep, if it's empty
+			if (h.memory.isIdle || h.store.getFreeCapacity() != 0) {	// Skip this creep, if it's empty
 				continue;
 			}
-
 			const transportRequests: Request[] = room.getRequestsByType('transport');
 
 			for (const t of transportRequests) {
@@ -126,7 +136,7 @@ export class Supervisor {
 
 					t.assignedCreeps.push([h.name, currentEnergy]);
 					t.outboundEnergy += currentEnergy;
-					h.memory.isIdle = false;
+					h.memory.isIdle = true;
 					break;
 				}
 			}
@@ -175,7 +185,38 @@ export class Supervisor {
 			}
 
 			h.harvestSource();
-			h.memory.isIdle = true;
+			h.memory.isIdle = false;
+		}
+	}
+
+	private static driveTransporters(room: Room): void {
+		const transporters: Creep[] = room.getCreepsByRole('transporter');
+		const miningContainers = new Array<StructureContainer>;
+
+		// Prepare Array for later use
+		for (const id of room.memory.miningContainers) {
+		    if (id) {
+		        const container = Game.getObjectById(id);
+
+		        if (container && container instanceof StructureContainer) {
+		            miningContainers.push(container);
+		        }
+		    }
+		}
+
+		for (const t of transporters) {
+			// Refill at mining sites
+			if (t.store.getUsedCapacity() === 0) {
+				t.memory.isIdle = true;
+			}
+
+			if (t.memory.isIdle) {
+				const target = _.max(miningContainers,  function (c) {
+      				return c.store.getUsedCapacity(); });
+				if(t.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+		    		t.moveTo(target);
+				}
+			}
 		}
 	}
 

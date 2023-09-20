@@ -84,11 +84,21 @@ Room.prototype.getRefuelTargetId = function (): Id<_HasId> | undefined {
   }) as unknown as StructureContainer[];
   const droppedEnergy: Resource[] = this.find(FIND_DROPPED_RESOURCES);
 
-
+  // QUICK AND DIRTY
+  let containerEnergy: number = 0;
+  if (containers.length > 0) {
+    containerEnergy = _.max(containers, function (c) { return c.store.getUsedCapacity(); }).store.getUsedCapacity(RESOURCE_ENERGY);
+  }
+  let storageEnergy: number = 0;
   if (storage.length > 0) {
+    storageEnergy = _.max(containers, function (c) { return c.store.getUsedCapacity(); }).store.getUsedCapacity(RESOURCE_ENERGY);
+  }
+  // QUICK AND DIRTY END
+
+  if (storage.length > 0 && storageEnergy > 0) {
     // If a storage is built, we want to return that
     targetId = storage[0].id;
-  } else if (containers.length > 0) {
+  } else if (containers.length > 0 && containerEnergy > 0) {
     // Else we return the container with the most energy in it
     targetId = _.max(containers, function (c) {
       return c.store.getUsedCapacity();
@@ -102,7 +112,7 @@ Room.prototype.getRefuelTargetId = function (): Id<_HasId> | undefined {
 Room.prototype.setFullCreepsToIdle = function (): void {
   const fullCreeps: Creep[] = _.filter(this.getCreepsByRole("worker"), 
                                   function(creep) {
-                                    return creep.store.getFreeCapacity(RESOURCE_ENERGY) == 0
+                                    return creep.store.getFreeCapacity(RESOURCE_ENERGY) === 0
                                   });
 
   for (const creep of fullCreeps) {

@@ -60,7 +60,9 @@ export class TransportRequest extends CreepRequest {
 }
 
 export class BuildRequest extends CreepRequest {
-    constructor(targetId: string) {
+    buildPriority: Number
+
+    constructor(targetId: string, buildPriority: number) {
         super(
             'build',
             REQUEST_PRIORITIES.BUILD_REQUEST,
@@ -68,5 +70,6 @@ export class BuildRequest extends CreepRequest {
             // @ts-ignore: Object is possibly 'null'.
             Game.getObjectById(targetId).progressTotal - Game.getObjectById(targetId).progress
         )
+        this.buildPriority = buildPriority      // Used to order only build request within themselves
     }
 }

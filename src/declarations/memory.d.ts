@@ -1,8 +1,11 @@
 interface RoomMemory {
 	isInitialized: boolean;
-	euclideanDistance: number[][]:
-	Requests: Request[]
-	Tasks: Task[]
+	euclideanDistance: number[][];
+	Requests: Request[];
+	Tasks: Task[];
+	upgradeContainer: Id<_HadId>;
+	miningContainers: Id<_HadId>[];
+	storage: Id<_HadId>;
 }
 
 interface FlagMemory {

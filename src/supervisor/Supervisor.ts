@@ -29,10 +29,11 @@ export class Supervisor {
 			// Skip creep if he has something to do or is not completely empty ----------------------------------------
 			// We also want to skip transporters and janitors, as they have their own logic
 			if (!creep.memory.isIdle || 
-				creep.store.getUsedCapacity() != 0 || 
-				creep.memory.role === 'transporter' ||
-				creep.memory.role === 'janitor') {
+				creep.store.getUsedCapacity() != 0) {
 				delete creep.memory.refuelTargetId;
+				continue;
+			} else if (creep.memory.role === 'transporter' ||
+					   creep.memory.role === 'janitor') {
 				continue;
 			}
 
@@ -59,7 +60,9 @@ export class Supervisor {
 				if (buildRequestCount > 0 && storageLevel > 1500) {
 					creep.memory.refuelTargetId = room.memory.storage;
 				} else if (transportRequestCount > 0 && !room.memory.janitorPresent && storageLevel > 1500) {
-					creep.memory.refuelTargetId = room.memory.storage
+					creep.memory.refuelTargetId = room.memory.storage;
+				} else if (buildRequestCount > 0 && storageLevel <= 1500) {	// Workers should not travel to upgrade ...
+					creep.cancelOrder('move');								// if there's something to build
 				} else {
 					creep.memory.refuelTargetId = room.memory.upgradeContainer;
 				}
@@ -252,13 +255,11 @@ export class Supervisor {
 			// If the transporter is empty, it should refuel at the mining containers ---------------------------------
 			if (t.store.getUsedCapacity() === 0) {
 				if (!t.memory.refuelTargetId) {
-					console.log(t.name, t.memory.refuelTargetId)
 					const refuelTarget = _.max(miningContainers,  function (c) {
 	      				return c.store.getUsedCapacity(); });
 					t.memory.refuelTargetId = refuelTarget.id;
 				}
 				const target = Game.getObjectById(t.memory.refuelTargetId);
-
 				if (t.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
 		    		t.moveTo(target)
 				}

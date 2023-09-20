@@ -209,10 +209,19 @@ export class Manager {
 			}
 		}
 
+		let upgradeContainerLevel: number = 0;
+		let storageLevel: number = 0;
+
+		if (room.memory.containersBuilt) {
+			upgradeContainerLevel = Game.getObjectById(room.memory.upgradeContainer).store.getUsedCapacity(RESOURCE_ENERGY);
+			storageLevel = Game.getObjectById(room.memory.storage).store.getUsedCapacity(RESOURCE_ENERGY);
+		}
+
 		// Create spawn request if certain requirements are met -------------------------------------------------------
-		if (workerCount < 2 ||
-			energyInContainers > containerCapacity / 1.5 ||	
-			(!room.memory.containersBuilt && energyOnGround >= ENERGY_ON_GROUND_THRESHOLD)) {
+		if (workerCount < 2 ||	// Always keep worker count at 2
+			(!room.memory.containersBuilt && energyInContainers > containerCapacity / 1.5) ||
+			(!room.memory.containersBuilt && energyOnGround >= ENERGY_ON_GROUND_THRESHOLD) ||
+			(storageLevel >= 1500 && upgradeContainerLevel === 2000)) {
 			// Get spawn requests for workers. We don't want to create another one ------------------------------------
 			const workerRequests: number = room.getSpawnRequests().filter((r) => r.role === 'worker').length;
 
@@ -252,7 +261,7 @@ export class Manager {
 			}
 		}
 
-		// We make also sure, that all containers are finised building ------------------------------------------------
+		// We make also sure, that all containers are finished building -----------------------------------------------
 		if (room.memory.containersBuilt && transporterCount < 2 || energyInMiningContainers > 3000) {
 			// Get spawn requests for transporters. We don't want to create another one -------------------------------
 			const transporterRequests: number = room.getSpawnRequests().filter((r) => r.role === 'transporter').length;

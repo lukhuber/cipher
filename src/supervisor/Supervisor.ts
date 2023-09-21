@@ -351,7 +351,8 @@ export class Supervisor {
             return (
                 (structure.structureType === STRUCTURE_EXTENSION ||
                 structure.structureType === STRUCTURE_CONTAINER ||
-                structure.structureType === STRUCTURE_STORAGE ) &&
+                structure.structureType === STRUCTURE_STORAGE ||
+                structure.structureType === STRUCTURE_ROAD) &&
                 structure.hits < structure.hitsMax
                 )
 		},})

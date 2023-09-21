@@ -372,9 +372,9 @@ export class Manager {
 		});
 
 		for (const t of towers) {
-			const towerIsFull: boolean = t.store.getFreeCapacity(RESOURCE_ENERGY) === 0;
-
-			if (!towerIsFull) {
+			// Towers don't need to be filled all the way. Only fill if there is enough space for 400 energy
+			const towerNeedsEnergy: boolean = t.store.getFreeCapacity(RESOURCE_ENERGY) >= 400;
+			if (towerNeedsEnergy && Game.time % 10 === 0) {
 				const transportRequest: TransportRequest = new TransportRequest(t.id, 0, RESOURCE_ENERGY);
 
 				if (!existingRequests.some((r) => r.targetId === transportRequest.targetId)) {
@@ -397,8 +397,10 @@ export class Manager {
 			}
 			if(target) {
 				const targetIsFull: boolean = target.store.getFreeCapacity(RESOURCE_ENERGY) === 0;
-
-				if (targetIsFull) {
+				if (targetIsFull || 
+					// We need to check towers seperately, since they can expend energy at the same tick they got filled
+					// @ts-ignore: Object is possibly 'null'.
+					(target.structureType === STRUCTURE_TOWER && target.store.getFreeCapacity() === 10)) {
 					// Set assigned Creeps to idle
 					for (const creepPair of r.assignedCreeps) {
 						const creep: Creep = Game.creeps[creepPair[0]];

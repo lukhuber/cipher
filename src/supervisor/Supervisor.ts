@@ -110,7 +110,7 @@ export class Supervisor {
 
 		// Following code orders the subset of transport requests of 'requests depending on transportPriority'
 		let tTemp: Request[] = Array.from(requests);		// Necessary, to not manipulate the original array 'requests'
-		tTemp = tTemp.filter(r => r.type === 'transport').sort((a, b) => a.transportPriority - b.transportPriority);
+		tTemp = tTemp.filter(r => r.type === 'transport').sort((a, b) => a.transportPriority - b.transportPriority).reverse();
 
 		const firstTransportRequest: Request = requests.find(r => r.type === 'transport');
 		const firstTransportRequestIndex: number = requests.indexOf(firstTransportRequest);

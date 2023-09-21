@@ -73,6 +73,20 @@ export function updateBunkerRCL3(room: Room, anchorPos: RoomPosition): void {
   	{ x: -1, y: +2 },
   	{ x: +1, y: +2 },
   	{ x:  0, y: +3 },
+
+  	{ x: -2, y: -5 },
+  	{ x: +2, y: -5 },
+  	{ x: -3, y: -4 },
+  	{ x: -1, y: -4 },
+  	{ x: +1, y: -4 },
+  	{ x: +3, y: -4 },
+  	{ x: -4, y: -3 },
+  	{ x:  0, y: -3 },
+  	{ x: +4, y: -3 },
+  	{ x: -5, y: -2 },
+  	{ x: +5, y: -2 },
+  	{ x: -4, y: -1 },
+  	{ x: +4, y: -1 },
   ];
 
   // Place all construction sites. Existing buildings will be automatically skipped -----------------------------------
@@ -112,6 +126,11 @@ export function updateBunkerRCL4(room: Room, anchorPos: RoomPosition): void {
 		{ x: +1, y: -3 },
 		{ x: +2, y: -3 },
   ];
+  const roads: pos[] = [
+  	{ x: -1, y: -6 },
+  	{ x:  0, y: -6 },
+  	{ x: +1, y: -6 }
+  ];
 
   // Place all construction sites. Existing buildings will be automatically skipped -----------------------------------
   for (const e of extensions) {
@@ -126,6 +145,13 @@ export function updateBunkerRCL4(room: Room, anchorPos: RoomPosition): void {
 		anchorPos.y + storage.y,
 		STRUCTURE_STORAGE
   );
+  for (const r of roads) {
+  	room.createConstructionSite(
+	  	anchorPos.x + r.x,
+	  	anchorPos.y + r.y,
+	  	STRUCTURE_ROAD
+  	)
+  }
 }
 
 export function updateBunkerRCL5(room: Room, anchorPos: RoomPosition): void {

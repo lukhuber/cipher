@@ -250,7 +250,7 @@ export class Manager {
 		}
 	}
 
-	// Make sure to always have 2 tranporters =========================================================================
+	// Make sure to always have 1 tranporters =========================================================================
 	private static manageTransporterCount(room: Room): void {
 		const controller: StructureController | undefined = room.controller;
 
@@ -300,7 +300,7 @@ export class Manager {
 	private static manageJanitorCount(room: Room): void {
 		const janitor: Creep[] = room.getCreepsByRole('janitor');
 
-		if (janitor.length <= 1) {
+		if (janitor.length <= 1 && room.memory.containersBuilt) {
 			// If the janitor has more than 100 ticks to live, skip spawn request creation ----------------------------
 			// @ts-ignore: Object is possibly 'null'.
 			if (janitor.length > 0 && janitor[0].ticksToLive > 100) {
@@ -322,7 +322,7 @@ export class Manager {
 
 			// Create request, if no transporter is spawning and no request is pending --------------------------------
 			if (janitorRequests === 0 && janitorSpawning === 0) {
-				const spawnRequest: SpawnRequest = new SpawnRequest(9, 'janitor');
+				const spawnRequest: SpawnRequest = new SpawnRequest(4, 'janitor');
 				room.memory.Requests.push(spawnRequest);
 			}
 		}
@@ -341,7 +341,7 @@ export class Manager {
 			const spawnIsFull: boolean = s.store.getFreeCapacity(RESOURCE_ENERGY) === 0;
 
 			if (!spawnIsFull) {
-				const transportRequest: TransportRequest = new TransportRequest(s.id, RESOURCE_ENERGY);
+				const transportRequest: TransportRequest = new TransportRequest(s.id, 9, RESOURCE_ENERGY);
 				if (!existingRequests.some((r) => r.targetId === transportRequest.targetId)) {
 					room.memory.Requests.push(transportRequest);
 					// room.setFullCreepsToIdle(); // Full creeps travelling elsewhere should fill instead
@@ -358,7 +358,24 @@ export class Manager {
 			const extensionIsFull: boolean = e.store.getFreeCapacity(RESOURCE_ENERGY) === 0;
 
 			if (!extensionIsFull) {
-				const transportRequest: TransportRequest = new TransportRequest(e.id, RESOURCE_ENERGY);
+				const transportRequest: TransportRequest = new TransportRequest(e.id, 10, RESOURCE_ENERGY);
+
+				if (!existingRequests.some((r) => r.targetId === transportRequest.targetId)) {
+					room.memory.Requests.push(transportRequest);
+				}
+			}
+		}
+
+		// Check if towers need to be filled --------------------------------------------------------------------------
+		const towers: StructureTower[] = room.find(FIND_MY_STRUCTURES, {
+			filter: (t) => t.structureType === STRUCTURE_TOWER,
+		});
+
+		for (const t of towers) {
+			const towerIsFull: boolean = t.store.getFreeCapacity(RESOURCE_ENERGY) === 0;
+
+			if (!towerIsFull) {
+				const transportRequest: TransportRequest = new TransportRequest(t.id, 0, RESOURCE_ENERGY);
 
 				if (!existingRequests.some((r) => r.targetId === transportRequest.targetId)) {
 					room.memory.Requests.push(transportRequest);

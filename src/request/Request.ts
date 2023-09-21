@@ -46,8 +46,9 @@ export class UpgradeRequest extends CreepRequest {
 
 export class TransportRequest extends CreepRequest {
     resourceType: ResourceConstant
+    transportPriority: number
 
-    constructor(targetId: string, resourceType: ResourceConstant) {
+    constructor(targetId: string, transportPriority: number, resourceType: ResourceConstant) {
         super(
             'transport',
             REQUEST_PRIORITIES.TRANSPORT_REQUEST,
@@ -55,6 +56,7 @@ export class TransportRequest extends CreepRequest {
             // @ts-ignore: Object is possibly 'null'.
             Game.getObjectById(targetId).store.getFreeCapacity(resourceType)
         )
+        this.transportPriority = transportPriority
         this.resourceType = resourceType
     }
 }

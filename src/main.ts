@@ -21,7 +21,7 @@ import './prototypes/Room';
 import './prototypes/Creep';
 import { ErrorMapper } from 'utils/ErrorMapper';
 import { ROOM_STATISTICS, ROOM_EUCLID_DIST } from './settings';
-import { Console } from './console/Console'
+import { Console } from './console/Console';
 import { Memory } from './memory/Memory';
 import { Architect } from './architect/Architect';
 import { Manager } from './manager/Manager';
@@ -34,21 +34,21 @@ export const loop = ErrorMapper.wrapLoop(() => {
 	// Cycle through each room and run each component -----------------------------------------------------------------
 	for (const i in Game.rooms) {
 		const room: Room = Game.rooms[i];
-		Console.init();											// Provides console commands
+		Console.init(); // Provides console commands
 
 		// Prepare room for subsequent code ---------------------------------------------------------------------------
 		if (!room.memory.isInitialized) {
-			Architect.init(room);								// Calc euclidean distance and place flags
-			Memory.init(room);									// Prepare memory for all entities in room
+			Architect.init(room); // Calc euclidean distance and place flags
+			Memory.init(room); // Prepare memory for all entities in room
 		}
 
 		// Check for new work and create requests ---------------------------------------------------------------------
 		if (room.memory.isInitialized) {
-		  Architect.run(room);									// Place construction sites
-		  Manager.init(room);									// Makes sure, that structures are assigned their role
-		  Manager.run(room);									// Create request for undone work
-		  Supervisor.init(room);								// Assign requests to creeps/spawns/towers/etc.
-		  Supervisor.run(room);									// Do the assigned requests
+			Architect.run(room); // Place construction sites
+			Manager.init(room); // Makes sure, that structures are assigned their role
+			Manager.run(room); // Create request for undone work
+			Supervisor.init(room); // Assign requests to creeps/spawns/towers/etc.
+			Supervisor.run(room); // Do the assigned requests
 		}
 
 		// Show room statistics ---------------------------------------------------------------------------------------

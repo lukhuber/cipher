@@ -6,25 +6,25 @@ import {
 	updateBunkerRCL5,
 	updateBunkerRCL6,
 	updateBunkerRCL7,
-	updateBunkerRCL8
+	updateBunkerRCL8,
 } from './bunkerLayout';
 
 // The Architect prepares each room in terms of bunker placement, roads and other buildings ###########################
 export class Architect {
 	// This function is call for all uninitialized rooms ==============================================================
 	static init(room: Room): void {
-		room.memory.euclideanDistance = calcEuclideanDistance(room);		// Save euclidDist for this room
+		room.memory.euclideanDistance = calcEuclideanDistance(room); // Save euclidDist for this room
 
-		Architect.placeBunkerAnchor(room);									// Places the bunker anchor at best pos
-		Architect.placeMiningSiteAnchors(room);								// Anchors for mining site containers
-		Architect.placeUpgradeSiteAnchor(room);								// Anchors for upgrade site container
+		Architect.placeBunkerAnchor(room); // Places the bunker anchor at best pos
+		Architect.placeMiningSiteAnchors(room); // Anchors for mining site containers
+		Architect.placeUpgradeSiteAnchor(room); // Anchors for upgrade site container
 
 		room.memory.isInitialized = true;
 	}
 
 	// This function is only call for initialized rooms ===============================================================
 	static run(room: Room): void {
-		Architect.updateBunker(room);				// Checks controller level and updates bunker accordingly
+		Architect.updateBunker(room); // Checks controller level and updates bunker accordingly
 	}
 
 	// Places bunker anchor furthest away from walls. Bunker needs at least 7 blocks space in each direction ==========

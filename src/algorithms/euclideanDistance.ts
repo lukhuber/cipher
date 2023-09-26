@@ -41,7 +41,16 @@ export function calcEuclideanDistance(room: Room): number[][] {
 				const lowerRightVal: number = euclideanDistance[x + 1][y + 1];
 
 				euclideanDistance[x][y] =
-					Math.min(upperVal, leftVal, lowerVal, rightVal, upperLeftVal, lowerLeftVal, upperRightVal, lowerRightVal) + 1;
+					Math.min(
+						upperVal,
+						leftVal,
+						lowerVal,
+						rightVal,
+						upperLeftVal,
+						lowerLeftVal,
+						upperRightVal,
+						lowerRightVal
+					) + 1;
 			} else {
 				euclideanDistance[x][y] = 0;
 			}
@@ -63,7 +72,16 @@ export function calcEuclideanDistance(room: Room): number[][] {
 				const lowerRightVal: number = euclideanDistance[x + 1][y + 1];
 
 				euclideanDistance[x][y] =
-					Math.min(upperVal, leftVal, lowerVal, rightVal, upperLeftVal, lowerLeftVal, upperRightVal, lowerRightVal) + 1;
+					Math.min(
+						upperVal,
+						leftVal,
+						lowerVal,
+						rightVal,
+						upperLeftVal,
+						lowerLeftVal,
+						upperRightVal,
+						lowerRightVal
+					) + 1;
 			} else {
 				euclideanDistance[x][y] = 0;
 			}
@@ -85,7 +103,16 @@ export function calcEuclideanDistance(room: Room): number[][] {
 				const lowerRightVal: number = euclideanDistance[x + 1][y + 1];
 
 				euclideanDistance[x][y] =
-					Math.min(upperVal, leftVal, lowerVal, rightVal, upperLeftVal, lowerLeftVal, upperRightVal, lowerRightVal) + 1;
+					Math.min(
+						upperVal,
+						leftVal,
+						lowerVal,
+						rightVal,
+						upperLeftVal,
+						lowerLeftVal,
+						upperRightVal,
+						lowerRightVal
+					) + 1;
 			} else {
 				euclideanDistance[x][y] = 0;
 			}

@@ -25,7 +25,7 @@ Creep.prototype.fillSpawn = function (spawn: StructureSpawn): void {
 	}
 };
 
-Creep.prototype.getEnergy = function(target: Structure | Resource): void {
+Creep.prototype.getEnergy = function (target: Structure | Resource): void {
 	if (target instanceof Structure) {
 		if (this.withdraw(target as Structure, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
 			this.moveTo(target as Structure, { visualizePathStyle: {} });
@@ -35,4 +35,4 @@ Creep.prototype.getEnergy = function(target: Structure | Resource): void {
 			this.moveTo(target as Resource, { visualizePathStyle: {} });
 		}
 	}
-}
+};

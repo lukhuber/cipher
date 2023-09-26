@@ -15,10 +15,30 @@ export enum REQUEST_PRIORITIES {
 // Priorities with which build requests get orderes within themselves
 export enum BUILD_PRIORITIES {
     STRUCTURE_EXTENSION = 10,
-    STRUCTURE_TOWER     = 9,
-    STRUCTURE_STORAGE   = 8,
+    STRUCTURE_TOWER = 9,
+    STRUCTURE_STORAGE = 8,
     STRUCTURE_CONTAINER = 1,
 }
 
+// This are the spawn priorities, with which each role gets spawned. Note, that this priorities only apply, if there is
+// a creep with the same role already present in the room
+export enum SPAWN_PRIORITIES {
+    HARVESTER = 5,
+    WORKER = 4,
+    TRANSPORTER = 3,
+    JANITOR = 2,
+    UPGRADER = 1,
+}
+
+// This are the spawn priorities, with which each role gets spawned, if there is no creep with the same role present
+// in the room
+export enum INITIAL_SPAWN_PRIORITIES {
+    HARVESTER = 10,
+    WORKER = 9,
+    TRANSPORTER = 8,
+    JANITOR = 7,
+    UPGRADER = 6,
+}
+
 // Threshold after which more workers will be spawned
-export const ENERGY_ON_GROUND_THRESHOLD: number = 1000
+export const ENERGY_ON_GROUND_THRESHOLD: number = 1000;

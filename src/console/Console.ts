@@ -18,7 +18,7 @@ export class Console {
 		helpMessage += 'help()                        This Message\n';
 		helpMessage += 'report(roomName?)             Creates a report of all requests (in a room)\n';
 		helpMessage += 'clearAllRequests(roomName?)   Deletes all requests (in a room)\n';
-		helpMessage += 'setCreepsToIdle(roomName?)	  Sets all creeps (in a room) to idle\n'
+		helpMessage += 'setCreepsToIdle(roomName?)	  Sets all creeps (in a room) to idle\n';
 
 		return helpMessage;
 	}
@@ -53,11 +53,12 @@ export class Console {
 	}
 
 	static reportBuildingRequests(roomName?: string): string {
-		const reportHeader: string = '--- REQUESTS DONE BY BUILDINGS -------------------------------------------------------------------- \n' +
-									 '╔══════════╦═══════════╦═══════════╗ \n' +
-							         '║ PRIORITY ║ TYPE      ║ ROLE      ║ \n';
-		let reportBody: string = ''
-		const reportFooter: string = '╚══════════╩═══════════╩═══════════╝ \n'
+		const reportHeader: string =
+			'--- REQUESTS DONE BY BUILDINGS -------------------------------------------------------------------- \n' +
+			'╔══════════╦═══════════╦════════════╗ \n' +
+			'║ PRIORITY ║ TYPE      ║ ROLE       ║ \n';
+		let reportBody: string = '';
+		const reportFooter: string = '╚══════════╩═══════════╩════════════╝ \n';
 
 		if (roomName) {
 			const requests: Request[] = Game.rooms[roomName].getBuildingRequests();
@@ -76,21 +77,26 @@ export class Console {
 		let requestSummary: string = '';
 		requests = _.sortBy(requests, 'priority').reverse();
 		for (const request of requests) {
-
-			requestSummary += '║ ' + request.priority.toString().padEnd(9, ' ') +
-							  '║ ' + request.type.padEnd(10, ' ') +
-							  '║ ' + request.role.padEnd(10, ' ') +
-							  '║\n';
+			requestSummary +=
+				'║ ' +
+				request.priority.toString().padEnd(9, ' ') +
+				'║ ' +
+				request.type.padEnd(10, ' ') +
+				'║ ' +
+				request.role.padEnd(11, ' ') +
+				'║\n';
 		}
 		return requestSummary;
 	}
 
 	static reportCreepRequests(roomName?: string): string {
-		const reportHeader: string = '--- REQUESTS DONE BY CREEPS ----------------------------------------------------------------------- \n' +
-									 '╔══════════╦═══════════╦═════════════════╦═══════════════╦═════════════╦══════════════════════════╗ \n' +
-							         '║ PRIORITY ║ TYPE      ║ OUTBOUND ENERGY ║ NEEDED ENERGY ║ TARGET TYPE ║ TARGET ID                ║ \n';
-		let reportBody: string = ''
-		const reportFooter: string = '╚══════════╩═══════════╩═════════════════╩═══════════════╩═════════════╩══════════════════════════╝ \n'
+		const reportHeader: string =
+			'--- REQUESTS DONE BY CREEPS ----------------------------------------------------------------------- \n' +
+			'╔══════════╦═══════════╦═════════════════╦═══════════════╦═════════════╦══════════════════════════╗ \n' +
+			'║ PRIORITY ║ TYPE      ║ OUTBOUND ENERGY ║ NEEDED ENERGY ║ TARGET TYPE ║ TARGET ID                ║ \n';
+		let reportBody: string = '';
+		const reportFooter: string =
+			'╚══════════╩═══════════╩═════════════════╩═══════════════╩═════════════╩══════════════════════════╝ \n';
 
 		if (roomName) {
 			const requests: Request[] = Game.rooms[roomName].getCreepRequests();
@@ -109,15 +115,21 @@ export class Console {
 		let requestSummary: string = '';
 		requests = _.sortBy(requests, 'priority').reverse();
 		for (const request of requests) {
-
-			requestSummary += '║ ' + request.priority.toString().padEnd(9, ' ') +
-							  '║ ' + request.type.padEnd(10, ' ') +
-							  '║ ' + request.outboundEnergy.toString().padEnd(16, ' ') +
-							  '║ ' + request.neededEnergy.toString().padEnd(14, ' ') +
-							  // @ts-ignore: Object is possibly 'null'.
-							  '║ ' + Game.getObjectById(request.targetId).structureType.padEnd(12, ' ') +
-							  '║ ' + request.targetId.padEnd(25, ' ') +
-							  '║\n';
+			requestSummary +=
+				'║ ' +
+				request.priority.toString().padEnd(9, ' ') +
+				'║ ' +
+				request.type.padEnd(10, ' ') +
+				'║ ' +
+				request.outboundEnergy.toString().padEnd(16, ' ') +
+				'║ ' +
+				request.neededEnergy.toString().padEnd(14, ' ') +
+				'║ ' +
+				// @ts-ignore: Object is possibly 'null'.
+				Game.getObjectById(request.targetId).structureType.padEnd(12, ' ') +
+				'║ ' +
+				request.targetId.padEnd(25, ' ') +
+				'║\n';
 		}
 		return requestSummary;
 	}

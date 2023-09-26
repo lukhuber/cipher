@@ -24,7 +24,10 @@ export class Visuals {
 				const green: number = euclideanDistance[x][y] * 17;
 				const white: number = parseInt('ff', 16);
 				const color: string =
-					'#' + (white - green).toString(16).padStart(2, '0') + 'ff' + (white - green).toString(16).padStart(2, '0');
+					'#' +
+					(white - green).toString(16).padStart(2, '0') +
+					'ff' +
+					(white - green).toString(16).padStart(2, '0');
 				new RoomVisual(room.name).text(String(euclideanDistance[x][y]), x, y + 0.25, { color: color });
 			}
 		}
@@ -91,14 +94,14 @@ export class Visuals {
 		};
 
 		// Get current creep counts -----------------------------------------------------------------------------------
-		const currentHarvesters: number = room.getCreepsByRole('harvester').length
-		const currentJanitors: number = room.getCreepsByRole('janitor').length
-		const currentUpgraders: number = room.getCreepsByRole('upgrader').length
-		const currentWorkers: number = room.getCreepsByRole('worker').length
-		const currentTransporters: number = room.getCreepsByRole('transporter').length
+		const currentHarvesters: number = room.getCreepsByRole('harvester').length;
+		const currentJanitors: number = room.getCreepsByRole('janitor').length;
+		const currentUpgraders: number = room.getCreepsByRole('upgrader').length;
+		const currentWorkers: number = room.getCreepsByRole('worker').length;
+		const currentTransporters: number = room.getCreepsByRole('transporter').length;
 
 		// Other needed values ----------------------------------------------------------------------------------------
-		const neededHarvesters: number = room.find(FIND_SOURCES).length
+		const neededHarvesters: number = room.find(FIND_SOURCES).length;
 
 		// Draw the box for the creeps stats --------------------------------------------------------------------------
 		const creepsStats: RoomVisual = new RoomVisual(room.name);
@@ -114,17 +117,21 @@ export class Visuals {
 		creepsStats.text('Transporter', pos.x + 0.2, pos.y + 5.75, styleLabels);
 
 		// Fill the box with current creep counts ---------------------------------------------------------------------
-		creepsStats.text(currentJanitors.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 1.75, styleValues)
-		creepsStats.text(currentHarvesters.toString() + ' / ' + neededHarvesters.toString(),
-										 pos.x + PANEL_WIDTH - 0.2, pos.y + 2.75, styleValues)
-		creepsStats.text(currentUpgraders.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 3.75, styleValues)
-		creepsStats.text(currentWorkers.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 4.75, styleValues)
-		creepsStats.text(currentTransporters.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 5.75, styleValues)
+		creepsStats.text(currentJanitors.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 1.75, styleValues);
+		creepsStats.text(
+			currentHarvesters.toString() + ' / ' + neededHarvesters.toString(),
+			pos.x + PANEL_WIDTH - 0.2,
+			pos.y + 2.75,
+			styleValues
+		);
+		creepsStats.text(currentUpgraders.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 3.75, styleValues);
+		creepsStats.text(currentWorkers.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 4.75, styleValues);
+		creepsStats.text(currentTransporters.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 5.75, styleValues);
 	}
 
 	private static roomRequests(room: Room): void {
 		// Define the anchor of this box ------------------------------------------------------------------------------
-		const pos: { x:number; y: number } = { x: ANCHOR.x + PANEL_WIDTH + 0.5, y: ANCHOR.y - 0.65};
+		const pos: { x: number; y: number } = { x: ANCHOR.x + PANEL_WIDTH + 0.5, y: ANCHOR.y - 0.65 };
 		const styleHeading: { opacity: number; font: number; align: 'center' | 'left' | 'right' | undefined } = {
 			opacity: OPACITY_TEXT,
 			font: FONTSIZE,
@@ -149,17 +156,17 @@ export class Visuals {
 		for (const i in creepRequests) {
 			const request: Request = creepRequests[i];
 			const assignedCreeps: [string, number][] = request.assignedCreeps;
-			let creepNames: string = ''
+			let creepNames: string = '';
 
 			for (const creepPair of assignedCreeps) {
 				const creepName: string = creepPair[0];
 				creepNames += creepName + ' ';
 			}
 
-			roomRequests.text(request.type, pos.x + 0.2, pos.y + 1.65 + +i, styleLabels);			// Type of the Request
-			roomRequests.text(request.outboundEnergy, pos.x + 3.5, pos.y + 1.65 + +i, styleLabels);	// Outbound Energy
-			roomRequests.text(request.neededEnergy, pos.x + 5.5, pos.y + 1.65 + +i, styleLabels); 	// Needed Energy
-			roomRequests.text(creepNames, pos.x + 7.5, pos.y + 1.65 + +i, styleLabels); 			// Names of creeps
+			roomRequests.text(request.type, pos.x + 0.2, pos.y + 1.65 + +i, styleLabels); // Type of the Request
+			roomRequests.text(request.outboundEnergy, pos.x + 3.5, pos.y + 1.65 + +i, styleLabels); // Outbound Energy
+			roomRequests.text(request.neededEnergy, pos.x + 5.5, pos.y + 1.65 + +i, styleLabels); // Needed Energy
+			roomRequests.text(creepNames, pos.x + 7.5, pos.y + 1.65 + +i, styleLabels); // Names of creeps
 		}
 	}
 
@@ -184,7 +191,7 @@ export class Visuals {
 
 		// Get current energy amounts ---------------------------------------------------------------------------------
 		const energyAvailable: number = room.energyAvailable;
-		
+
 		const energyOnGround: number = _.sum(_.map(room.find(FIND_DROPPED_RESOURCES), (energy) => energy.amount));
 
 		let energyInStorage: number = 0;
@@ -192,12 +199,14 @@ export class Visuals {
 			energyInStorage = Game.getObjectById(room.memory.storage).store.getUsedCapacity(RESOURCE_ENERGY);
 		}
 
-		let energyInUpgradeContainer: number = 0
+		let energyInUpgradeContainer: number = 0;
 		if (room.memory.upgradeContainer) {
-			energyInUpgradeContainer = Game.getObjectById(room.memory.upgradeContainer).store.getUsedCapacity(RESOURCE_ENERGY);
+			energyInUpgradeContainer = Game.getObjectById(room.memory.upgradeContainer).store.getUsedCapacity(
+				RESOURCE_ENERGY
+			);
 		}
 
-		let energyInMiningContainers: number = 0
+		let energyInMiningContainers: number = 0;
 		if (room.memory.miningContainers) {
 			for (const c of room.memory.miningContainers) {
 				energyInMiningContainers += Game.getObjectById(c).store.getUsedCapacity(RESOURCE_ENERGY);
@@ -223,7 +232,5 @@ export class Visuals {
 		roomInformation.text(energyInUpgradeContainer.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 3.75, styleValues);
 		roomInformation.text(energyInMiningContainers.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 4.75, styleValues);
 		roomInformation.text(energyOnGround.toString(), pos.x + PANEL_WIDTH - 0.2, pos.y + 5.75, styleValues);
-
-
 	}
 }

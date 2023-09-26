@@ -4,40 +4,42 @@ import { ENERGY_ON_GROUND_THRESHOLD, BUILD_PRIORITIES } from '.././settings';
 // The Manager is responsible for creating all requests, which the Supervisor will then assign to creeps ##############
 export class Manager {
 	static init(room: Room): void {
-		Manager.assessRoomState(room);				// Sets flags in room memory according to room status
-		Manager.assignContainerRole(room);			// Establishes difference between mining site containers and others
+		Manager.assessRoomState(room); 			// Sets flags in room memory according to room status
+		Manager.assignContainerRole(room); 		// Establishes difference between mining site containers and others
+		Manager.createPermanentRequests(room); 	// Adds permanent Requests (i.e. UpgradeController)
 	}
 
 	// This function combines all other functions assessing the current state of the room and creating requests =======
 	static run(room: Room): void {
-		Manager.createPermanentRequests(room);		// Adds permanent Requests (i.e. UpgradeController)
-		Manager.monitorMiningSites(room);			// Makes sure, that each source has a Harvester
-		Manager.monitorUpgradeSite(room);			// Makes sure, that one Upgrader is always available
+		Manager.monitorMiningSites(room); 		// Makes sure, that each source has a Harvester
+		Manager.monitorUpgradeSite(room); 		// Makes sure, that one Upgrader is always available
 
-		Manager.manageWorkerCount(room);			// Creates spawn requests for workers, depending on available energy
-		Manager.manageTransporterCount(room);		// Creates spawn requests for transporter. Always 2
-		Manager.manageJanitorCount(room);			// Creates spawn requests for janitor. Always 1
+		Manager.manageWorkerCount(room); 		// Creates spawn requests for workers, depending on available energy
+		Manager.manageTransporterCount(room); 	// Creates spawn requests for transporter. Always 2
+		Manager.manageJanitorCount(room); 		// Creates spawn requests for janitor. Always 1
 
-		Manager.createTransportRequests(room);		// Creates transport requests to fill energy sinks/storages
-		Manager.updateTransportRequests(room);		// Checks and adjusts existing transport requests
-		Manager.createBuildRequests(room);			// Creates building requets for each construction site
-		Manager.updateBuildRequests(room);			// Delete finished constructions from the requestlist
+		Manager.createTransportRequests(room); 	// Creates transport requests to fill energy sinks/storages
+		Manager.updateTransportRequests(room); 	// Checks and adjusts existing transport requests
+		Manager.createBuildRequests(room); 		// Creates building requets for each construction site
+		Manager.updateBuildRequests(room); 		// Delete finished constructions from the requestlist
 	}
 
 	// There are several flags in room memory, which indicate room status. This function sets them ====================
 	private static assessRoomState(room: Room): void {
 		// Check if all containers in this room are built -------------------------------------------------------------
 		const containerCount: number = room.find(FIND_STRUCTURES, {
-			filter: { structureType: STRUCTURE_CONTAINER },}).length;
-		const containerConstructionCount: number = room.find(FIND_MY_CONSTRUCTION_SITES, { 
-			filter: { structureType: STRUCTURE_CONTAINER },}).length;
+			filter: { structureType: STRUCTURE_CONTAINER },
+		}).length;
+		const containerConstructionCount: number = room.find(FIND_MY_CONSTRUCTION_SITES, {
+			filter: { structureType: STRUCTURE_CONTAINER },
+		}).length;
 
 		room.memory.containersBuilt = containerCount > 0 && containerConstructionCount === 0 ? true : false;
 
 		// Check if janitor is present --------------------------------------------------------------------------------
 		const janitorPresent: boolean = room.getCreepsByRole('janitor').length > 0 ? true : false;
 
-		room.memory.janitorPresent = janitorPresent ? true : false
+		room.memory.janitorPresent = janitorPresent ? true : false;
 	}
 
 	// We need the information which container is which, since we want to transport from mining site to somewhere else
@@ -50,7 +52,7 @@ export class Manager {
 		// Stores the ID of the upgrade container in the rooms memory -------------------------------------------------
 		if (!room.memory.upgradeContainer) {
 			const upgradeContainer: Structure[] = upgradeSite.pos.lookFor(LOOK_STRUCTURES);
-			
+
 			if (upgradeContainer.length) {
 				room.memory.upgradeContainer = upgradeContainer[0].id;
 			}
@@ -62,17 +64,19 @@ export class Manager {
 				const miningContainer: Structure[] = flag.pos.lookFor(LOOK_STRUCTURES);
 
 				if (miningContainer.length && !room.memory.miningContainers.includes(miningContainer[0].id)) {
-					room.memory.miningContainers.push(miningContainer[0].id)
+					room.memory.miningContainers.push(miningContainer[0].id);
 				}
 			}
 		}
 
 		// Stores the ID of the bunker container (later the storage) in the rooms memory ------------------------------
-		if (!room.memory.storage) {
-			let storagePos: RoomPosition = new RoomPosition(bunkerAnchor.pos.x + 1, bunkerAnchor.pos.y, room.name) // Hardcoded, I know -.-
-			
-			// if there is actually a real storage (not just the temporary container) we want to save that in memory
-			const actualStorage = room.find(FIND_MY_STRUCTURES, {filter: { structureType: STRUCTURE_STORAGE },});
+		if (!room.memory.storage || Game.time % 1000 === 0) {
+			let storagePos: RoomPosition = new RoomPosition(bunkerAnchor.pos.x + 1, bunkerAnchor.pos.y, room.name); // Hardcoded, I know -.-
+
+			// If there is actually a real storage (not just the temporary container) we want to save that in memory
+			const actualStorage = room.find(FIND_MY_STRUCTURES, {
+				filter: { structureType: STRUCTURE_STORAGE },
+			});
 			if (actualStorage.length > 0) {
 				storagePos = actualStorage[0].pos;
 			}
@@ -87,7 +91,12 @@ export class Manager {
 
 	private static createPermanentRequests(room: Room): void {
 		// Check if upgradeRequest for this room is existing. Continue if not -----------------------------------------
-		if (_.includes(_.map(room.memory.Requests, (r) => r.type), 'upgrade')) {
+		if (
+			_.includes(
+				_.map(room.memory.Requests, (r) => r.type),
+				'upgrade'
+			)
+		) {
 			return;
 		}
 
@@ -95,8 +104,9 @@ export class Manager {
 			const newUpgradeRequest: UpgradeRequest = new UpgradeRequest(room.controller.id);
 			room.memory.Requests.push(newUpgradeRequest);
 		} else {
-			console.log(room.name + "does not have a controller. \n" +
-						"No permanent UpgradeRequest created for this room.");
+			console.log(
+				room.name + 'does not have a controller. \n' + 'No permanent UpgradeRequest created for this room.'
+			);
 		}
 	}
 
@@ -220,15 +230,19 @@ export class Manager {
 		let storageLevel: number = 0;
 
 		if (room.memory.containersBuilt) {
-			upgradeContainerLevel = Game.getObjectById(room.memory.upgradeContainer).store.getUsedCapacity(RESOURCE_ENERGY);
+			upgradeContainerLevel = Game.getObjectById(room.memory.upgradeContainer).store.getUsedCapacity(
+				RESOURCE_ENERGY
+			);
 			storageLevel = Game.getObjectById(room.memory.storage).store.getUsedCapacity(RESOURCE_ENERGY);
 		}
 
 		// Create spawn request if certain requirements are met -------------------------------------------------------
-		if (workerCount < 2 ||	// Always keep worker count at 2
+		if (
+			workerCount < 2 || // Always keep worker count at 2
 			(!room.memory.containersBuilt && energyInContainers > containerCapacity / 1.5) ||
 			(!room.memory.containersBuilt && energyOnGround >= ENERGY_ON_GROUND_THRESHOLD) ||
-			(storageLevel >= 1500 && upgradeContainerLevel === 2000)) {
+			(storageLevel >= 1500 && upgradeContainerLevel === 2000)
+		) {
 			// Get spawn requests for workers. We don't want to create another one ------------------------------------
 			const workerRequests: number = room.getSpawnRequests().filter((r) => r.role === 'worker').length;
 
@@ -254,8 +268,9 @@ export class Manager {
 	private static manageTransporterCount(room: Room): void {
 		const controller: StructureController | undefined = room.controller;
 
-		if (room.controller == undefined || room.controller.level < 2) { 	// We don't need transporters prior level 2
-			return
+		if (room.controller == undefined || room.controller.level < 2) {
+			// We don't need transporters prior level 2
+			return;
 		}
 
 		const transporterCount: number = room.getCreepsByRole('transporter').length;
@@ -269,7 +284,7 @@ export class Manager {
 		}
 
 		// We make also sure, that all containers are finished building -----------------------------------------------
-		if (room.memory.containersBuilt && transporterCount < 2 || energyInMiningContainers > 3000) {
+		if ((room.memory.containersBuilt && transporterCount < 2) || energyInMiningContainers > 3000) {
 			// Get spawn requests for transporters. We don't want to create another one -------------------------------
 			const transporterRequests: number = room.getSpawnRequests().filter((r) => r.role === 'transporter').length;
 
@@ -389,18 +404,19 @@ export class Manager {
 		const existingTransportRequests = room.getRequestsByType('transport');
 
 		for (const r of existingTransportRequests) {
-
 			// Check if target is full and delete Request -------------------------------------------------------------
 			const target = Game.getObjectById(r.targetId) as SinkUnit;
-			if(target === null) {
-				throw new Error ('Target of TransportRequest does not exist (anymore)');
+			if (target === null) {
+				throw new Error('Target of TransportRequest does not exist (anymore)');
 			}
-			if(target) {
+			if (target) {
 				const targetIsFull: boolean = target.store.getFreeCapacity(RESOURCE_ENERGY) === 0;
-				if (targetIsFull || 
+				if (
+					targetIsFull ||
 					// We need to check towers seperately, since they can expend energy at the same tick they got filled
 					// @ts-ignore: Object is possibly 'null'.
-					(target.structureType === STRUCTURE_TOWER && target.store.getFreeCapacity() === 10)) {
+					(target.structureType === STRUCTURE_TOWER && target.store.getFreeCapacity() === 10)
+				) {
 					// Set assigned Creeps to idle
 					for (const creepPair of r.assignedCreeps) {
 						const creep: Creep = Game.creeps[creepPair[0]];
@@ -408,7 +424,7 @@ export class Manager {
 					}
 					// Delete the Request
 					const index = room.memory.Requests.indexOf(r, 0);
-					room.memory.Requests.splice(index, 1)
+					room.memory.Requests.splice(index, 1);
 				}
 			}
 
@@ -425,27 +441,27 @@ export class Manager {
 		for (const conSite of constructionSites) {
 			let buildPriority: number = 0;
 
-			switch(conSite.structureType) { 
-			   case STRUCTURE_EXTENSION: { 
-			      buildPriority = BUILD_PRIORITIES.STRUCTURE_EXTENSION
-			      break; 
-			   } 
-			   case STRUCTURE_TOWER: { 
-			      buildPriority = BUILD_PRIORITIES.STRUCTURE_TOWER
-			      break; 
-			   }
-			   case STRUCTURE_STORAGE: { 
-			      buildPriority = BUILD_PRIORITIES.STRUCTURE_STORAGE
-			      break; 
-			   }
-			   case STRUCTURE_CONTAINER: { 
-			      buildPriority = BUILD_PRIORITIES.STRUCTURE_CONTAINER
-			      break; 
-			   } 
-			   default: { 
-			      buildPriority = 0
-			      break; 
-			   } 
+			switch (conSite.structureType) {
+				case STRUCTURE_EXTENSION: {
+					buildPriority = BUILD_PRIORITIES.STRUCTURE_EXTENSION;
+					break;
+				}
+				case STRUCTURE_TOWER: {
+					buildPriority = BUILD_PRIORITIES.STRUCTURE_TOWER;
+					break;
+				}
+				case STRUCTURE_STORAGE: {
+					buildPriority = BUILD_PRIORITIES.STRUCTURE_STORAGE;
+					break;
+				}
+				case STRUCTURE_CONTAINER: {
+					buildPriority = BUILD_PRIORITIES.STRUCTURE_CONTAINER;
+					break;
+				}
+				default: {
+					buildPriority = 0;
+					break;
+				}
 			}
 
 			const buildRequest: BuildRequest = new BuildRequest(conSite.id, buildPriority);
@@ -469,10 +485,8 @@ export class Manager {
 				}
 				// Delete the Request
 				const index = room.memory.Requests.indexOf(request, 0);
-				room.memory.Requests.splice(index, 1)
+				room.memory.Requests.splice(index, 1);
 			}
 		}
-
-
 	}
 }

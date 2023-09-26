@@ -6,18 +6,18 @@ import { getBodyParts, getNewCreepName } from '.././utils/utilsSpawner';
 // The Supervisor converts Requests to Tasks and assigns them to creeps ###############################################
 export class Supervisor {
 	static init(room: Room): void {
-		Supervisor.refuelIdleCreeps(room);	// Refuels each Creep before assigning a new request
-		Supervisor.assignRequests(room);	// Assign the next most important Request to all Creeps
+		Supervisor.refuelIdleCreeps(room); // Refuels each Creep before assigning a new request
+		Supervisor.assignRequests(room); // Assign the next most important Request to all Creeps
 	}
 
 	static run(room: Room): void {
-		Supervisor.doSpawnRequests(room);		// Execute pending SpawnRequests from Manager
-		Supervisor.driveHarvesters(room); 		// Makes the harvesters go mining sources
-		Supervisor.driveTransporters(room);		// Transport energy away from mining sites to where it's needed
-		Supervisor.driveJanitors(room);			// Makes sure, that spawn + extensions are filled
-		Supervisor.runTasks(room);				// Cycles through all creeps of this room and run their tasks
+		Supervisor.doSpawnRequests(room); // Execute pending SpawnRequests from Manager
+		Supervisor.driveHarvesters(room); // Makes the harvesters go mining sources
+		Supervisor.driveTransporters(room); // Transport energy away from mining sites to where it's needed
+		Supervisor.driveJanitors(room); // Makes sure, that spawn + extensions are filled
+		Supervisor.runTasks(room); // Cycles through all creeps of this room and run their tasks
 
-		Supervisor.runTowers(room);				// Makes sure, that Towers repair owned structures
+		Supervisor.runTowers(room); // Makes sure, that Towers repair owned structures
 	}
 
 	// All creeps completely emtpy and set to idle are filled, before a new Request is assigned to them ===============
@@ -30,21 +30,21 @@ export class Supervisor {
 		for (const creep of creeps) {
 			// Skip creep if he has something to do or is not completely empty ----------------------------------------
 			// We also want to skip transporters and janitors, as they have their own logic
-			if (!creep.memory.isIdle || 
-				creep.store.getUsedCapacity() != 0) {
+			if (!creep.memory.isIdle || creep.store.getUsedCapacity() != 0) {
 				delete creep.memory.refuelTargetId;
 				continue;
-			} else if (creep.memory.role === 'transporter' ||
-					   creep.memory.role === 'janitor') {
+			} else if (creep.memory.role === 'transporter' || creep.memory.role === 'janitor') {
 				continue;
 			}
 
 			// If the target is empty, we want to delete it -----------------------------------------------------------
 			if (creep.memory.refuelTargetId) {
-				const target = Game.getObjectById(creep.memory.refuelTargetId)
-				if ((target instanceof StructureContainer || target instanceof StructureStorage) && 
-					target.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
-					delete creep.memory.refuelTargetId
+				const target = Game.getObjectById(creep.memory.refuelTargetId);
+				if (
+					(target instanceof StructureContainer || target instanceof StructureStorage) &&
+					target.store.getUsedCapacity(RESOURCE_ENERGY) === 0
+				) {
+					delete creep.memory.refuelTargetId;
 				}
 			}
 
@@ -58,7 +58,7 @@ export class Supervisor {
 			// energy to still fill spawn + extensions
 			let storageLevel: number = 0;
 			if (room.memory.storage) {
-				storageLevel = Game.getObjectById(room.memory.storage).store.getUsedCapacity(RESOURCE_ENERGY)
+				storageLevel = Game.getObjectById(room.memory.storage).store.getUsedCapacity(RESOURCE_ENERGY);
 			}
 
 			if (creep.memory.role === 'worker' && room.memory.containersBuilt && transporterPresent) {
@@ -66,8 +66,9 @@ export class Supervisor {
 					creep.memory.refuelTargetId = room.memory.storage;
 				} else if (transportRequestCount > 0 && !room.memory.janitorPresent) {
 					creep.memory.refuelTargetId = room.memory.storage;
-				} else if (buildRequestCount > 0 && storageLevel < 1500) {	// Workers should not travel to upgrade ...
-					creep.cancelOrder('move');								// if there's something to build
+				} else if (buildRequestCount > 0 && storageLevel < 1500) {
+					// Workers should not travel to upgrade ...
+					creep.cancelOrder('move'); // if there's something to build
 					continue;
 				} else {
 					creep.memory.refuelTargetId = room.memory.upgradeContainer;
@@ -85,7 +86,7 @@ export class Supervisor {
 				creep.memory.refuelTargetId = room.getRefuelTargetId();
 			} else {
 				if (creep.memory.refuelTargetId === undefined) {
-					console.log ('No target to refuel ' + creep.name + ' could be found!');
+					console.log('No target to refuel ' + creep.name + ' could be found!');
 				}
 
 				const target: Structure | Resource = Game.getObjectById(creep.memory.refuelTargetId);
@@ -97,52 +98,60 @@ export class Supervisor {
 	// A not empty and idle creep is assigned a new Request ===========================================================
 	private static assignRequests(room: Room): void {
 		let requests: Request[] = room.getCreepRequests();
-		requests = _.sortBy(requests, 'priority').reverse();	// Sort request by priority
+		requests = _.sortBy(requests, 'priority').reverse(); // Sort request by priority
 
 		// Following code orders the subset of build requests of 'requests' depending on buildPriority ----------------
-		let bTemp: Request[] = Array.from(requests);		// Necessary, to not manipulate the original array 'requests'
-		bTemp = bTemp.filter(r => r.type === 'build').sort((a, b) => a.buildPriority - b.buildPriority).reverse();
+		let bTemp: Request[] = Array.from(requests); // Necessary, to not manipulate the original array 'requests'
+		bTemp = bTemp
+			.filter((r) => r.type === 'build')
+			.sort((a, b) => a.buildPriority - b.buildPriority)
+			.reverse();
 
-		const firstBuildRequest: Request = requests.find(r => r.type === 'build');
+		const firstBuildRequest: Request = requests.find((r) => r.type === 'build');
 		const firstBuildRequestIndex: number = requests.indexOf(firstBuildRequest);
 
 		requests.splice(firstBuildRequestIndex, bTemp.length, ...bTemp);
 
 		// Following code orders the subset of transport requests of 'requests depending on transportPriority'
-		let tTemp: Request[] = Array.from(requests);		// Necessary, to not manipulate the original array 'requests'
-		tTemp = tTemp.filter(r => r.type === 'transport').sort((a, b) => a.transportPriority - b.transportPriority).reverse();
+		let tTemp: Request[] = Array.from(requests); // Necessary, to not manipulate the original array 'requests'
+		tTemp = tTemp
+			.filter((r) => r.type === 'transport')
+			.sort((a, b) => a.transportPriority - b.transportPriority)
+			.reverse();
 
-		const firstTransportRequest: Request = requests.find(r => r.type === 'transport');
+		const firstTransportRequest: Request = requests.find((r) => r.type === 'transport');
 		const firstTransportRequestIndex: number = requests.indexOf(firstTransportRequest);
 
 		requests.splice(firstTransportRequestIndex, tTemp.length, ...tTemp);
 
 		// If a janitor is present, we don't want workers to do transport requests ------------------------------------
 		if (room.memory.janitorPresent) {
-			requests = requests.filter(r => r.type != 'transport');
+			requests = requests.filter((r) => r.type != 'transport');
 		}
 
 		// Get number of current creeps in each role for later use ----------------------------------------------------
 		const upgraders: Creep[] = room.getCreepsByRole('upgrader');
 		const workers: Creep[] = room.getCreepsByRole('worker');
 		const transporters: Creep[] = room.getCreepsByRole('transporter');
-		
+
 		// Assign the obligatory upgradeRequest of each room to all upgraders -----------------------------------------
 		for (const u of upgraders) {
-			if (!u.memory.isIdle || u.store.getUsedCapacity() === 0) {	// Skip this creep, if he isn't idle or empty
+			if (!u.memory.isIdle || u.store.getUsedCapacity() === 0) {
+				// Skip this creep, if he isn't idle or empty
 				continue;
 			}
 
 			const upgradeRequest: Request[] = room.getRequestsByType('upgrade');
 			const currentEnergy: number = u.store.getUsedCapacity(RESOURCE_ENERGY);
-			upgradeRequest[0].assignedCreeps.push([u.name, currentEnergy])
+			upgradeRequest[0].assignedCreeps.push([u.name, currentEnergy]);
 			upgradeRequest[0].outboundEnergy += currentEnergy;
-			u.memory.isIdle = false
+			u.memory.isIdle = false;
 		}
 
 		// Assign the top most Request to the next worker, if that Request is not yet satisfied by other workers ------
 		for (const w of workers) {
-			if (!w.memory.isIdle || w.store.getUsedCapacity() === 0) {	// Skip this creep, if he isn't idle or empty
+			if (!w.memory.isIdle || w.store.getUsedCapacity() === 0) {
+				// Skip this creep, if he isn't idle or empty
 				continue;
 			}
 
@@ -161,21 +170,23 @@ export class Supervisor {
 			if (w.memory.isIdle) {
 				const upgradeRequest: Request[] = room.getRequestsByType('upgrade');
 				const currentEnergy: number = w.store.getUsedCapacity(RESOURCE_ENERGY);
-				upgradeRequest[0].assignedCreeps.push([w.name, currentEnergy])
+				upgradeRequest[0].assignedCreeps.push([w.name, currentEnergy]);
 				upgradeRequest[0].outboundEnergy += currentEnergy;
-				w.memory.isIdle = false
+				w.memory.isIdle = false;
 			}
 		}
 
-		if (workers.length > 0) {	// Skip the rest if workers are present.
-			return
+		if (workers.length > 0) {
+			// Skip the rest if workers are present.
+			return;
 		}
 
 		const harvesters: Creep[] = room.getCreepsByRole('harvester');
 
 		// If no workers are present harvesters should do transport requests ------------------------------------------
 		for (const h of harvesters) {
-			if (h.memory.isIdle || h.store.getFreeCapacity() != 0) {	// Skip this creep, if it's empty
+			if (h.memory.isIdle || h.store.getFreeCapacity() != 0) {
+				// Skip this creep, if it's empty
 				continue;
 			}
 			const transportRequests: Request[] = room.getRequestsByType('transport');
@@ -253,42 +264,43 @@ export class Supervisor {
 			upgradeContainerLevel = upgradeContainer.store.getUsedCapacity(RESOURCE_ENERGY);
 		}
 
-		const miningContainers = new Array<StructureContainer>;
+		const miningContainers = new Array<StructureContainer>();
 
 		// Get mining containers in an array, to send the transporter to refuel there ---------------------------------
 		for (const id of room.memory.miningContainers) {
-		    if (id) {
-		        const container = Game.getObjectById(id);
+			if (id) {
+				const container = Game.getObjectById(id);
 
-		        if (container && container instanceof StructureContainer) {
-		            miningContainers.push(container);
-		        }
-		    }
+				if (container && container instanceof StructureContainer) {
+					miningContainers.push(container);
+				}
+			}
 		}
 
 		for (const t of transporters) {
 			// If the transporter is empty, it should refuel at the mining containers ---------------------------------
 			if (t.store.getUsedCapacity() === 0) {
 				if (!t.memory.refuelTargetId) {
-					const refuelTarget = _.max(miningContainers,  function (c) {
-	      				return c.store.getUsedCapacity(); });
+					const refuelTarget = _.max(miningContainers, function (c) {
+						return c.store.getUsedCapacity();
+					});
 					t.memory.refuelTargetId = refuelTarget.id;
 				}
 				const target = Game.getObjectById(t.memory.refuelTargetId);
 				if (t.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-		    		t.moveTo(target)
+					t.moveTo(target);
 				}
 
-			// If the transporter in not empty, it should fill storage to at least 1000, else fill upgrade container --
+				// If the transporter in not empty, it should fill storage to at least 1000, else fill upgrade container --
 			} else if (t.store.getUsedCapacity() != 0 && storageLevel < 1500) {
 				delete t.memory.refuelTargetId;
-				if (t.transfer(storage, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE ) {
-					t.moveTo(storage)
+				if (t.transfer(storage, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+					t.moveTo(storage);
 				}
 			} else if (t.store.getUsedCapacity() != 0) {
 				delete t.memory.refuelTargetId;
-				if (t.transfer(upgradeContainer, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE ) {
-					t.moveTo(upgradeContainer)
+				if (t.transfer(upgradeContainer, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+					t.moveTo(upgradeContainer);
 				}
 			}
 		}
@@ -304,7 +316,7 @@ export class Supervisor {
 			if (j.store.getUsedCapacity() === 0) {
 				j.memory.isIdle = true;
 				if (j.withdraw(storage, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-		    		j.moveTo(storage)
+					j.moveTo(storage);
 				}
 				continue;
 			}
@@ -314,7 +326,7 @@ export class Supervisor {
 				j.memory.isIdle = true;
 
 				if (j.withdraw(storage, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-		    		j.moveTo(storage)
+					j.moveTo(storage);
 				}
 			}
 
@@ -346,16 +358,18 @@ export class Supervisor {
 	}
 
 	private static runTowers(room: Room): void {
-		const towers: StructureTower[] = room.find(FIND_MY_STRUCTURES, {filter: { structureType: STRUCTURE_TOWER }, });
-		const repairTargets: Structure[] = room.find(FIND_STRUCTURES, {filter: (structure) => {
-            return (
-                (structure.structureType === STRUCTURE_EXTENSION ||
-                structure.structureType === STRUCTURE_CONTAINER ||
-                structure.structureType === STRUCTURE_STORAGE ||
-                structure.structureType === STRUCTURE_ROAD) &&
-                structure.hits < structure.hitsMax
-                )
-		},})
+		const towers: StructureTower[] = room.find(FIND_MY_STRUCTURES, { filter: { structureType: STRUCTURE_TOWER } });
+		const repairTargets: Structure[] = room.find(FIND_STRUCTURES, {
+			filter: (structure) => {
+				return (
+					(structure.structureType === STRUCTURE_EXTENSION ||
+						structure.structureType === STRUCTURE_CONTAINER ||
+						structure.structureType === STRUCTURE_STORAGE ||
+						structure.structureType === STRUCTURE_ROAD) &&
+					structure.hits < structure.hitsMax
+				);
+			},
+		});
 
 		for (const t of towers) {
 			if (repairTargets.length > 0) {
@@ -363,5 +377,4 @@ export class Supervisor {
 			}
 		}
 	}
-
 }

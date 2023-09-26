@@ -34,24 +34,10 @@ type SinkUnit =
 	| StructureNuker
 	| StructureTower;
 
-type StorageUnit =
-	| StructureContainer
-	| StructureTerminal
-	| StructureStorage;
+type StorageUnit = StructureContainer | StructureTerminal | StructureStorage;
 
-type Request =
-	| UpgradeRequest
-	| SpawnRequest
-	| TransportRequest
-	| RefuelRequest;
+type Request = UpgradeRequest | SpawnRequest | TransportRequest | RefuelRequest;
 
-type Task =
-	| RefuelTask
-	| UpgradeTask;
+type Task = RefuelTask | UpgradeTask;
 
-type Roles =
-	| 'harvester'
-	| 'worker'
-	| 'upgrader'
-	| 'transporter'
-	| 'janitor';
+type Roles = 'harvester' | 'worker' | 'upgrader' | 'transporter' | 'janitor';

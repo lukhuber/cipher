@@ -4,24 +4,23 @@ import { ENERGY_ON_GROUND_THRESHOLD, BUILD_PRIORITIES } from '.././settings';
 // The Manager is responsible for creating all requests, which the Supervisor will then assign to creeps ##############
 export class Manager {
 	static init(room: Room): void {
-		Manager.assessRoomState(room); 			// Sets flags in room memory according to room status
-		Manager.assignContainerRole(room); 		// Establishes difference between mining site containers and others
-		Manager.createPermanentRequests(room); 	// Adds permanent Requests (i.e. UpgradeController)
+		Manager.assessRoomState(room); // Sets flags in room memory according to room status
+		Manager.assignContainerRole(room); // Establishes difference between mining site containers and others
+		Manager.createPermanentRequests(room); // Adds permanent Requests (i.e. UpgradeController)
 	}
 
 	// This function combines all other functions assessing the current state of the room and creating requests =======
 	static run(room: Room): void {
-		Manager.monitorMiningSites(room); 		// Makes sure, that each source has a Harvester
-		Manager.monitorUpgradeSite(room); 		// Makes sure, that one Upgrader is always available
+		Manager.monitorMiningSites(room); // Makes sure, that each source has a Harvester
+		Manager.monitorUpgradeSite(room); // Makes sure, that Upgrade is assigned to controller
 
-		Manager.manageWorkerCount(room); 		// Creates spawn requests for workers, depending on available energy
-		Manager.manageTransporterCount(room); 	// Creates spawn requests for transporter. Always 2
-		Manager.manageJanitorCount(room); 		// Creates spawn requests for janitor. Always 1
+		Manager.createSpawnRequests(room); // Manages the creep count of each role
+		Manager.manageJanitorCount(room); // Creates spawn requests for janitor. Always 1
 
-		Manager.createTransportRequests(room); 	// Creates transport requests to fill energy sinks/storages
-		Manager.updateTransportRequests(room); 	// Checks and adjusts existing transport requests
-		Manager.createBuildRequests(room); 		// Creates building requets for each construction site
-		Manager.updateBuildRequests(room); 		// Delete finished constructions from the requestlist
+		Manager.createTransportRequests(room); // Creates transport requests to fill energy sinks/storages
+		Manager.updateTransportRequests(room); // Checks and adjusts existing transport requests
+		Manager.createBuildRequests(room); // Creates building requets for each construction site
+		Manager.updateBuildRequests(room); // Delete finished constructions from the requestlist
 	}
 
 	// There are several flags in room memory, which indicate room status. This function sets them ====================
@@ -37,12 +36,13 @@ export class Manager {
 		room.memory.containersBuilt = containerCount > 0 && containerConstructionCount === 0 ? true : false;
 
 		// Check if janitor is present --------------------------------------------------------------------------------
-		const janitorPresent: boolean = room.getCreepsByRole('janitor').length > 0 ? true : false;
+		room.memory.janitorPresent = room.getCreepsByRole('janitor').length > 0 ? true : false;
 
-		room.memory.janitorPresent = janitorPresent ? true : false;
+		// Check if transporter is present ----------------------------------------------------------------------------
+		room.memory.transporterPresent = room.getCreepsByRole('transporter').length > 0 ? true : false;
 	}
 
-	// We need the information which container is which, since we want to transport from mining site to somewhere else
+	// We need the information which container is which, since we want to transport from mining site to somewhere else=
 	// This should maybe be moved to Memory.ts
 	private static assignContainerRole(room: Room): void {
 		const miningSites: Flag[] = _.filter(Game.flags, (f) => f.name.includes(room.name + ' mining site'));
@@ -89,6 +89,7 @@ export class Manager {
 		}
 	}
 
+	// Currently only creates the permanent upgrade request in each room ==============================================
 	private static createPermanentRequests(room: Room): void {
 		// Check if upgradeRequest for this room is existing. Continue if not -----------------------------------------
 		if (
@@ -110,38 +111,8 @@ export class Manager {
 		}
 	}
 
-	// Check if the assigned Harvester is (still) alive and creates a SpawnRequest if not =============================
+	// Checks if harvesters are assigned to mining sites ==============================================================
 	private static monitorMiningSites(room: Room): void {
-		const flags: Flag[] = _.filter(Game.flags, (f) => f.name.includes(room.name + ' mining site'));
-
-		// Cycle through all flags. Check if assigned harvester is still alive. Else create request. ------------------
-		for (const f of flags) {
-			// Check if assigned harvester is dead or never existed (new room) ----------------------------------------
-			// @ts-ignore: Object is possibly 'null'.
-			if (f.memory.assignedHarvester === undefined || !Game.creeps[f.memory.assignedHarvester.name]) {
-				Game.flags[f.name].memory.assignedHarvester = undefined;
-
-				// Get spawn requests for harvesters. We don't want to create another one -----------------------------
-				const harvesterRequests: number = room.getSpawnRequests().filter((r) => r.role === 'harvester').length;
-
-				// Get spawns spawning harvesters. We don't want to create a request, if a harvester is spawning ------
-				const spawns: StructureSpawn[] = room.find(FIND_MY_SPAWNS);
-				let harvesterSpawning: number = 0;
-				for (const s of spawns) {
-					const spawn: StructureSpawn = Game.spawns[s.name];
-					if (spawn.spawning && spawn.spawning.name.includes('harvester')) {
-						harvesterSpawning += 1;
-					}
-				}
-
-				// Create request, if no harvester is spawning and no request is pending ------------------------------
-				if (harvesterRequests === 0 && harvesterSpawning === 0) {
-					const r: SpawnRequest = new SpawnRequest(10, 'harvester');
-					room.memory.Requests.push(r);
-				}
-			}
-		}
-
 		// Check if all harvesters are assigned to mining sites -------------------------------------------------------
 		const harvesters: Creep[] = room.getCreepsByRole('harvester');
 
@@ -160,35 +131,8 @@ export class Manager {
 		}
 	}
 
-	// Check if at least one Upgrader is (still) alive and creates a SpawnRequest if not ==============================
+	// Checks if upgrader is assigned to upgrade site =================================================================
 	private static monitorUpgradeSite(room: Room): void {
-		const f: Flag = _.filter(Game.flags, (f) => f.name.includes(room.name + ' upgrade site'))[0];
-
-		// Check if assigned harvester is dead or never existed (new room) --------------------------------------------
-		// @ts-ignore: Object is possibly 'null'.
-		if (f.memory.assignedUpgrader === undefined || !Game.creeps[f.memory.assignedUpgrader.name]) {
-			Game.flags[f.name].memory.assignedUpgrader = undefined;
-
-			// Get spawn requests for upgraders. We don't want to create another one ----------------------------------
-			const upgraderRequests: number = room.getSpawnRequests().filter((r) => r.role === 'upgrader').length;
-
-			// Get spawns spawning upgraders. We don't want to create a request, if a harvester is spawning -----------
-			const spawns: StructureSpawn[] = room.find(FIND_MY_SPAWNS);
-			let upgraderSpawning: number = 0;
-			for (const s of spawns) {
-				const spawn: StructureSpawn = Game.spawns[s.name];
-				if (spawn.spawning && spawn.spawning.name.includes('upgrader')) {
-					upgraderSpawning += 1;
-				}
-			}
-
-			// Create request, if no upgrader is spawning and no request is pending -----------------------------------
-			if (upgraderRequests === 0 && upgraderSpawning === 0) {
-				const spawnRequest: SpawnRequest = new SpawnRequest(6, 'upgrader');
-				room.memory.Requests.push(spawnRequest);
-			}
-		}
-
 		// Check if an upgrader is assigned to upgrade sites ----------------------------------------------------------
 		const upgraders: Creep[] = room.getCreepsByRole('upgrader');
 
@@ -208,106 +152,26 @@ export class Manager {
 		}
 	}
 
-	// Makes sure to always have at least 2 workers. More workers will be spawed, if energy permits it ================
-	private static manageWorkerCount(room: Room): void {
-		const workerCount: number = room.getCreepsByRole('worker').length;
-		const energyOnGround: number = _.sum(_.map(room.find(FIND_DROPPED_RESOURCES), (energy) => energy.amount));
-
-		const containers: StructureContainer[] = room.find(FIND_STRUCTURES, {
-			filter: { structureType: STRUCTURE_CONTAINER },
-		}) as unknown as StructureContainer[];
-		let containerCapacity: number = 0;
-		let energyInContainers: number = 0;
-
-		if (containers.length != 0) {
-			for (const container of containers) {
-				containerCapacity += container.store.getCapacity();
-				energyInContainers += container.store[RESOURCE_ENERGY];
-			}
+	// Manages the creep count of each role in the room ===============================================================
+	private static createSpawnRequests(room: Room): void {
+		if (room.isHarvesterNeeded()) {
+			room.createSpawnRequest('harvester');
 		}
 
-		let upgradeContainerLevel: number = 0;
-		let storageLevel: number = 0;
-
-		if (room.memory.containersBuilt) {
-			upgradeContainerLevel = Game.getObjectById(room.memory.upgradeContainer).store.getUsedCapacity(
-				RESOURCE_ENERGY
-			);
-			storageLevel = Game.getObjectById(room.memory.storage).store.getUsedCapacity(RESOURCE_ENERGY);
+		if (room.isUpgraderNeeded()) {
+			room.createSpawnRequest('upgrader');
 		}
 
-		// Create spawn request if certain requirements are met -------------------------------------------------------
-		if (
-			workerCount < 2 || // Always keep worker count at 2
-			(!room.memory.containersBuilt && energyInContainers > containerCapacity / 1.5) ||
-			(!room.memory.containersBuilt && energyOnGround >= ENERGY_ON_GROUND_THRESHOLD) ||
-			(storageLevel >= 1500 && upgradeContainerLevel === 2000)
-		) {
-			// Get spawn requests for workers. We don't want to create another one ------------------------------------
-			const workerRequests: number = room.getSpawnRequests().filter((r) => r.role === 'worker').length;
-
-			// Get spawns spawning workers. We don't want to create a request, if a workers is spawning ---------------
-			const spawns: StructureSpawn[] = room.find(FIND_MY_SPAWNS);
-			let workerSpawning: number = 0;
-			for (const s of spawns) {
-				const spawn: StructureSpawn = Game.spawns[s.name];
-				if (spawn.spawning && spawn.spawning.name.includes('worker')) {
-					workerSpawning += 1;
-				}
-			}
-
-			// Create request, if no workers is spawning and no request is pending ------------------------------------
-			if (workerRequests === 0 && workerSpawning === 0) {
-				const spawnRequest: SpawnRequest = new SpawnRequest(4, 'worker');
-				room.memory.Requests.push(spawnRequest);
-			}
-		}
-	}
-
-	// Make sure to always have 1 tranporters =========================================================================
-	private static manageTransporterCount(room: Room): void {
-		const controller: StructureController | undefined = room.controller;
-
-		if (room.controller == undefined || room.controller.level < 2) {
-			// We don't need transporters prior level 2
-			return;
+		if (room.isWorkerNeeded()) {
+			room.createSpawnRequest('worker');
 		}
 
-		const transporterCount: number = room.getCreepsByRole('transporter').length;
-
-		let energyInMiningContainers: number = 0;
-
-		if (room.memory.miningContainers) {
-			for (const c of room.memory.miningContainers) {
-				energyInMiningContainers += Game.getObjectById(c).store.getUsedCapacity(RESOURCE_ENERGY);
-			}
+		if (room.isTransporterNeeded()) {
+			room.createSpawnRequest('transporter');
 		}
 
-		// We make also sure, that all containers are finished building -----------------------------------------------
-		if ((room.memory.containersBuilt && transporterCount < 2) || energyInMiningContainers > 3000) {
-			// Get spawn requests for transporters. We don't want to create another one -------------------------------
-			const transporterRequests: number = room.getSpawnRequests().filter((r) => r.role === 'transporter').length;
-
-			// Get spawns spawning transporters. We don't want to create a request, if a transporter is spawning ------
-			const spawns: StructureSpawn[] = room.find(FIND_MY_SPAWNS);
-			let transporterSpawning: number = 0;
-			for (const s of spawns) {
-				const spawn: StructureSpawn = Game.spawns[s.name];
-				if (spawn.spawning && spawn.spawning.name.includes('transporter')) {
-					transporterSpawning += 1;
-				}
-			}
-
-			const workerCount: number = room.getCreepsByRole('worker').length;
-
-			// This makes sure, that at least one worker and one transporter are spawned, instead of only workers -----
-			const priority: number = workerCount < 2 ? 2 : 5;
-
-			// Create request, if no transporter is spawning and no request is pending --------------------------------
-			if (transporterRequests === 0 && transporterSpawning === 0) {
-				const spawnRequest: SpawnRequest = new SpawnRequest(priority, 'transporter');
-				room.memory.Requests.push(spawnRequest);
-			}
+		if (room.isJanitorNeeded()) {
+			room.createSpawnRequest('janitor');
 		}
 	}
 

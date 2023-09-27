@@ -8,6 +8,7 @@ interface RoomMemory {
 	storage: Id<_HadId>;
 	containersBuilt: boolean;
 	janitorPresent: boolean;
+	transporterPresent: boolean;
 }
 
 interface FlagMemory {

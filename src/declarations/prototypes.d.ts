@@ -18,6 +18,12 @@ interface Room {
 	getDroppedEnergy(): Id<_HasId> | undefinded;
 	getRefuelTargetId(): ID<_HadId> | undefined;
 	setFullCreepsToIdle(): void;
+	createSpawnRequest(role: string): void;
+	isHarvesterNeeded(): boolean;
+	isUpgraderNeeded(): boolean;
+	isWorkerNeeded(): boolean;
+	isTransporterNeeded(): boolean;
+	isJanitorNeeded(): boolean;
 }
 
 interface Creep {

@@ -13,10 +13,7 @@ export class Manager {
 	static run(room: Room): void {
 		Manager.monitorMiningSites(room); // Makes sure, that each source has a Harvester
 		Manager.monitorUpgradeSite(room); // Makes sure, that Upgrade is assigned to controller
-
 		Manager.createSpawnRequests(room); // Manages the creep count of each role
-		Manager.manageJanitorCount(room); // Creates spawn requests for janitor. Always 1
-
 		Manager.createTransportRequests(room); // Creates transport requests to fill energy sinks/storages
 		Manager.updateTransportRequests(room); // Checks and adjusts existing transport requests
 		Manager.createBuildRequests(room); // Creates building requets for each construction site
@@ -172,38 +169,6 @@ export class Manager {
 
 		if (room.isJanitorNeeded()) {
 			room.createSpawnRequest('janitor');
-		}
-	}
-
-	// Makes sure, that 1 janitor is always present. Will spawn 1 janitor 100 ticks before the other is dead ==========
-	private static manageJanitorCount(room: Room): void {
-		const janitor: Creep[] = room.getCreepsByRole('janitor');
-
-		if (janitor.length <= 1 && room.memory.containersBuilt) {
-			// If the janitor has more than 100 ticks to live, skip spawn request creation ----------------------------
-			// @ts-ignore: Object is possibly 'null'.
-			if (janitor.length > 0 && janitor[0].ticksToLive > 100) {
-				return;
-			}
-
-			// Get spawn requests for janitors. We don't want to create another one -----------------------------------
-			const janitorRequests: number = room.getSpawnRequests().filter((r) => r.role === 'janitor').length;
-
-			// Get spawns spawning transporters. We don't want to create a request, if a janitor is spawning ----------
-			const spawns: StructureSpawn[] = room.find(FIND_MY_SPAWNS);
-			let janitorSpawning: number = 0;
-			for (const s of spawns) {
-				const spawn: StructureSpawn = Game.spawns[s.name];
-				if (spawn.spawning && spawn.spawning.name.includes('janitor')) {
-					janitorSpawning += 1;
-				}
-			}
-
-			// Create request, if no transporter is spawning and no request is pending --------------------------------
-			if (janitorRequests === 0 && janitorSpawning === 0) {
-				const spawnRequest: SpawnRequest = new SpawnRequest(4, 'janitor');
-				room.memory.Requests.push(spawnRequest);
-			}
 		}
 	}
 

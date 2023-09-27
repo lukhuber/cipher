@@ -37,7 +37,7 @@ export enum INITIAL_SPAWN_PRIORITIES {
     WORKER = 9,
     TRANSPORTER = 8,
     JANITOR = 7,
-    UPGRADER = 6,
+    UPGRADER = 1,
 }
 
 // Threshold after which more workers will be spawned

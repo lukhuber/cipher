@@ -213,7 +213,10 @@ Room.prototype.isWorkerNeeded = function (): boolean {
     }
 
     // If too much energy is on the floor, we need more workers
-    if (_.sum(_.map(this.find(FIND_DROPPED_RESOURCES), (energy) => energy.amount)) > ENERGY_ON_GROUND_THRESHOLD) {
+    if (
+        !this.memory.containersBuilt &&
+        _.sum(_.map(this.find(FIND_DROPPED_RESOURCES), (energy) => energy.amount)) > ENERGY_ON_GROUND_THRESHOLD
+    ) {
         return true;
     }
 
@@ -268,7 +271,7 @@ Room.prototype.isTransporterNeeded = function (): boolean {
     }
 
     // We make also sure, that all containers are finished building
-    if (this.memory.containersBuilt && (transporterCount < 2 || energyInMiningContainers > 3000)) {
+    if (this.memory.containersBuilt && (transporterCount < 2 || energyInMiningContainers > 3500)) {
         return true;
     } else {
         return false;
@@ -276,11 +279,11 @@ Room.prototype.isTransporterNeeded = function (): boolean {
 };
 
 Room.prototype.isJanitorNeeded = function (): boolean {
-    const janitor: Creep[] = this.getCreepsByRole('Janitor');
+    const janitor: Creep[] = this.getCreepsByRole('janitor');
 
     if (janitor.length === 0 && this.memory.containersBuilt) {
         return true;
-    } else if (janitor.length > 0 && (janitor[0].ticksToLive as number) < 100) {
+    } else if (janitor.length === 1 && (janitor[0].ticksToLive as number) < 100) {
         return true;
     } else {
         return false;

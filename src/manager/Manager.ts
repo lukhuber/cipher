@@ -110,6 +110,18 @@ export class Manager {
 
 	// Checks if harvesters are assigned to mining sites ==============================================================
 	private static monitorMiningSites(room: Room): void {
+		const miningFlags: Flag[] = room.find(FIND_FLAGS, {
+			filter: (f) => {
+				return f.name.includes('mining');
+			},
+		});
+
+		for (const f of miningFlags) {
+			if (f.memory.assignedHarvester && Game.getObjectById(f.memory.assignedHarvester.id) === null) {
+				delete f.memory.assignedHarvester;
+			}
+		}
+
 		// Check if all harvesters are assigned to mining sites -------------------------------------------------------
 		const harvesters: Creep[] = room.getCreepsByRole('harvester');
 
@@ -130,6 +142,19 @@ export class Manager {
 
 	// Checks if upgrader is assigned to upgrade site =================================================================
 	private static monitorUpgradeSite(room: Room): void {
+		const upgradeFlag: Flag = room.find(FIND_FLAGS, {
+			filter: (f) => {
+				return f.name.includes('upgrade');
+			},
+		})[0];
+
+		if (
+			upgradeFlag.memory.assignedUpgrader &&
+			Game.getObjectById(upgradeFlag.memory.assignedUpgrader.id) === null
+		) {
+			delete upgradeFlag.memory.assignedUpgrader;
+		}
+
 		// Check if an upgrader is assigned to upgrade sites ----------------------------------------------------------
 		const upgraders: Creep[] = room.getCreepsByRole('upgrader');
 

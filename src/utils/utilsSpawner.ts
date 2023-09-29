@@ -37,6 +37,7 @@ function getHarvesterParts(room: Room): BodyPartConstant[] {
 
 function getUpgraderParts(room: Room): BodyPartConstant[] {
     let energyAvailable: number = room.energyAvailable;
+    energyAvailable = energyAvailable > 1000 ? 1000 : energyAvailable;
     const partsCosts: number = 250; // Represents cost of WORK, CARRY, MOVE, MOVE
     const parts: BodyPartConstant[] = [];
 
@@ -52,6 +53,7 @@ function getUpgraderParts(room: Room): BodyPartConstant[] {
 
 function getWorkerParts(room: Room): BodyPartConstant[] {
     let energyAvailable: number = room.energyAvailable;
+    energyAvailable = energyAvailable > 1000 ? 1000 : energyAvailable;
     const partsCosts: number = 250; // Represents cost of WORK, CARRY, MOVE, MOVE
     const parts: BodyPartConstant[] = [];
 

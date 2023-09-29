@@ -213,9 +213,11 @@ export class Supervisor {
 		}
 
 		// If spawn + all extensions are filled, process the next spawnRequest ----------------------------------------
+		// If no workers are present, spawn a basic harvester to ensure that colony is not failing completely
 		const storesAreFilled: boolean = room.energyAvailable === room.energyCapacityAvailable;
+		const noWorkersPresent: boolean = room.getCreepsByRole('worker').length === 0 ? true : false
 
-		if (storesAreFilled) {
+		if (storesAreFilled || noWorkersPresent) {
 			const spawn: StructureSpawn = room.find(FIND_MY_SPAWNS)[0];
 			const nextTask: Request = _.max(requests, 'priority');
 

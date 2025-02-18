@@ -49,7 +49,7 @@ export class Supervisor {
 				}
 			}
 
-			// Upgrade should use the upgrade container if possible ---------------------------------------------------
+			// Upgrader should use the upgrade container if possible ---------------------------------------------------
 			if (creep.memory.role === 'upgrader' && room.memory.containersBuilt && transporterPresent) {
 				creep.memory.refuelTargetId = room.memory.upgradeContainer;
 			}
@@ -68,8 +68,15 @@ export class Supervisor {
 				} else if (transportRequestCount > 0 && !room.memory.janitorPresent) {
 					creep.memory.refuelTargetId = room.memory.storage;
 				} else if (buildRequestCount > 0 && storageLevel < STORAGE_LEVEL_THRESHOLD) {
-					// Workers should not travel to upgrade ...
-					creep.cancelOrder('move'); // if there's something to build
+					// Workers should travel near the storage to refuel if there is something to build, but the storage is not full
+					// They then leave some space around the storage. This prevents workers from clogging up the bunker
+					const storage = Game.getObjectById(room.memory.storage);
+					const moveAwayPosition = new RoomPosition(
+						storage.pos.x + 5,
+						storage.pos.y + 5,
+						room.name
+					);
+					creep.moveTo(moveAwayPosition);
 					continue;
 				} else {
 					creep.memory.refuelTargetId = room.memory.upgradeContainer;

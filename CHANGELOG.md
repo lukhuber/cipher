@@ -11,3 +11,4 @@ This is a incomplete list of all the features I want to include into a specific 
 ## v0.0.6
 - Transporters now check, if enough energy is left to refuel themselves, once they reach the mining container and otherwise choose another container
 - Changed hardcoded storage level threshold to a constant in settings.ts
+- Workers now don't clog around the storage, if storage is not full enough

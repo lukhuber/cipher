@@ -295,6 +295,9 @@ export class Supervisor {
 					});
 					if (refuelTarget) {
 						t.memory.refuelTargetId = refuelTarget.id;
+					} else {
+						t.memory.isIdle = true;
+						continue;
 					}
 				}
 				const target = Game.getObjectById(t.memory.refuelTargetId);

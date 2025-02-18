@@ -72,8 +72,8 @@ export class Supervisor {
 					// They then leave some space around the storage. This prevents workers from clogging up the bunker
 					const storage = Game.getObjectById(room.memory.storage);
 					const moveAwayPosition = new RoomPosition(
-						storage.pos.x + 5,
-						storage.pos.y + 5,
+						storage.pos.x + 4,
+						storage.pos.y + 4,
 						room.name
 					);
 					creep.moveTo(moveAwayPosition);
@@ -287,6 +287,8 @@ export class Supervisor {
 			}
 		}
 
+		let energyTowardsStorage : number = 0; // Used to track how much energy is transported towards storage
+
 		for (const t of transporters) {
 			// If the transporter is empty, it should refuel at the mining containers.
 			// The transporter also checks, if other transporters are already refueling at the same container
@@ -314,14 +316,12 @@ export class Supervisor {
 
 			// If the transporter is not empty, it should fill storage to at least the threshold, else fill upgrade container
 			} else if (t.store.getUsedCapacity() != 0) {
-				const otherTransportersCapacity = _.sum(
-					_.filter(transporters, (otherT) => otherT.memory.refuelTargetId === storage.id && otherT.id !== t.id),
-					(otherT) => otherT.store.getUsedCapacity()
-				);
-				if (storageLevel + otherTransportersCapacity < STORAGE_LEVEL_THRESHOLD) {
+				const buildRequestCount: number = room.getRequestsByType('build').length;
+				if (buildRequestCount > 0 || storageLevel + energyTowardsStorage < STORAGE_LEVEL_THRESHOLD) {
 					delete t.memory.refuelTargetId;
 					if (t.transfer(storage, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
 						t.moveTo(storage);
+						energyTowardsStorage += t.store.getUsedCapacity();
 					}
 				} else {
 					delete t.memory.refuelTargetId;

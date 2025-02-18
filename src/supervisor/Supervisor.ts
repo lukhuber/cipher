@@ -293,14 +293,14 @@ export class Supervisor {
 			// and only refuels, if there is enough energy left for itself.
 			if (t.store.getUsedCapacity() === 0) {
 				if (!t.memory.refuelTargetId) {
-					const refuelTarget = _.find(miningContainers, function (c) {
+					const refuelTarget = _.max(miningContainers, function (c) {
 						const otherTransportersCapacity = _.sum(
 							_.filter(transporters, (otherT) => otherT.memory.refuelTargetId === c.id),
 							(otherT) => otherT.store.getCapacity()
 						);
-						return c.store.getUsedCapacity() >= t.store.getCapacity() + otherTransportersCapacity;
+						return c.store.getUsedCapacity() - otherTransportersCapacity;
 					});
-					if (refuelTarget) {
+					if (refuelTarget && refuelTarget.store.getUsedCapacity() >= t.store.getCapacity()) {
 						t.memory.refuelTargetId = refuelTarget.id;
 					} else {
 						t.memory.isIdle = true;

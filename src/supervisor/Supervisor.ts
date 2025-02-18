@@ -2,6 +2,7 @@ import { runRefuel, runUpgrade } from '.././task/tasks';
 import { SpawnRequest, TransportRequest, UpgradeRequest } from '.././request/Request';
 import { triageRequest } from '.././request/requests';
 import { getBodyParts, getNewCreepName } from '.././utils/utilsSpawner';
+import { STORAGE_LEVEL_THRESHOLD } from '.././settings';
 
 // The Supervisor converts Requests to Tasks and assigns them to creeps ###############################################
 export class Supervisor {
@@ -54,7 +55,7 @@ export class Supervisor {
 			}
 
 			// Workers should refuel at the storage when not upgrading ------------------------------------------------
-			// We make sure, that there is 1500 energy in storage, before taking it, so that the janitor has enough
+			// We make sure, that there is STOARGE_LEVEL_THRESHOLD in storage, before taking it, so that the janitor has enough
 			// energy to still fill spawn + extensions
 			let storageLevel: number = 0;
 			if (room.memory.storage) {
@@ -62,11 +63,11 @@ export class Supervisor {
 			}
 
 			if (creep.memory.role === 'worker' && room.memory.containersBuilt && transporterPresent) {
-				if (buildRequestCount > 0 && storageLevel >= 1500) {
+				if (buildRequestCount > 0 && storageLevel >= STORAGE_LEVEL_THRESHOLD) {
 					creep.memory.refuelTargetId = room.memory.storage;
 				} else if (transportRequestCount > 0 && !room.memory.janitorPresent) {
 					creep.memory.refuelTargetId = room.memory.storage;
-				} else if (buildRequestCount > 0 && storageLevel < 1500) {
+				} else if (buildRequestCount > 0 && storageLevel < STORAGE_LEVEL_THRESHOLD) {
 					// Workers should not travel to upgrade ...
 					creep.cancelOrder('move'); // if there's something to build
 					continue;
@@ -268,7 +269,7 @@ export class Supervisor {
 
 		const miningContainers = new Array<StructureContainer>();
 
-		// Get mining containers in an array, to send the transporter to refuel there ---------------------------------
+		// Get mining containers in an array, to send the transporter to refuel there
 		for (const id of room.memory.miningContainers) {
 			if (id) {
 				const container = Game.getObjectById(id);
@@ -280,21 +281,29 @@ export class Supervisor {
 		}
 
 		for (const t of transporters) {
-			// If the transporter is empty, it should refuel at the mining containers ---------------------------------
+			// If the transporter is empty, it should refuel at the mining containers.
+			// The transporter also checks, if other transporters are already refueling at the same container
+			// and only refuels, if there is enough energy left for itself.
 			if (t.store.getUsedCapacity() === 0) {
 				if (!t.memory.refuelTargetId) {
-					const refuelTarget = _.max(miningContainers, function (c) {
-						return c.store.getUsedCapacity();
+					const refuelTarget = _.find(miningContainers, function (c) {
+						const otherTransportersCapacity = _.sum(
+							_.filter(transporters, (otherT) => otherT.memory.refuelTargetId === c.id),
+							(otherT) => otherT.store.getCapacity()
+						);
+						return c.store.getUsedCapacity() >= t.store.getCapacity() + otherTransportersCapacity;
 					});
-					t.memory.refuelTargetId = refuelTarget.id;
+					if (refuelTarget) {
+						t.memory.refuelTargetId = refuelTarget.id;
+					}
 				}
 				const target = Game.getObjectById(t.memory.refuelTargetId);
 				if (t.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
 					t.moveTo(target);
 				}
 
-				// If the transporter in not empty, it should fill storage to at least 1000, else fill upgrade container --
-			} else if (t.store.getUsedCapacity() != 0 && storageLevel < 1500) {
+				// If the transporter is not empty, it should fill storage to at least the threshold, else fill upgrade container
+			} else if (t.store.getUsedCapacity() != 0 && storageLevel < STORAGE_LEVEL_THRESHOLD) {
 				delete t.memory.refuelTargetId;
 				if (t.transfer(storage, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
 					t.moveTo(storage);

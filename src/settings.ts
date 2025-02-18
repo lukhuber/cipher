@@ -42,3 +42,6 @@ export enum INITIAL_SPAWN_PRIORITIES {
 
 // Threshold after which more workers will be spawned
 export const ENERGY_ON_GROUND_THRESHOLD: number = 1000;
+
+// Threshold for storage level before workers can take energy
+export const STORAGE_LEVEL_THRESHOLD: number = 1500;

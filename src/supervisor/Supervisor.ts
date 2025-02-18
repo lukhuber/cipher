@@ -19,7 +19,6 @@ export class Supervisor {
 		Supervisor.runTasks(room); // Cycles through all creeps of this room and run their tasks
 
 		Supervisor.runTowers(room); // Makes sure, that Towers repair owned structures
-		Supervisor.keepDistanceFromContainers(room); // Ensure idle creeps keep a distance from containers
 	}
 
 	// All creeps completely emtpy and set to idle are filled, before a new Request is assigned to them ===============
@@ -47,6 +46,27 @@ export class Supervisor {
 					target.store.getUsedCapacity(RESOURCE_ENERGY) === 0
 				) {
 					delete creep.memory.refuelTargetId;
+					// Move away if the target is empty
+					const positions = [
+						new RoomPosition(target.pos.x + 4, target.pos.y, room.name),
+						new RoomPosition(target.pos.x - 4, target.pos.y, room.name),
+						new RoomPosition(target.pos.x, target.pos.y + 4, room.name),
+						new RoomPosition(target.pos.x, target.pos.y - 4, room.name),
+					];
+
+					let moveAwayPosition: RoomPosition | null = null;
+
+					for (const pos of positions) {
+						if (!creep.room.lookForAt(LOOK_TERRAIN, pos).includes('wall')) {
+							moveAwayPosition = pos;
+							break;
+						}
+					}
+
+					if (moveAwayPosition) {
+						creep.moveTo(moveAwayPosition);
+					}
+					continue;
 				}
 			}
 
@@ -72,12 +92,25 @@ export class Supervisor {
 					// Workers should travel near the storage to refuel if there is something to build, but the storage is not full
 					// They then leave some space around the storage. This prevents workers from clogging up the bunker
 					const storage = Game.getObjectById(room.memory.storage);
-					const moveAwayPosition = new RoomPosition(
-						storage.pos.x + 4,
-						storage.pos.y + 4,
-						room.name
-					);
-					creep.moveTo(moveAwayPosition);
+					const positions = [
+						new RoomPosition(storage.pos.x + 4, storage.pos.y, room.name),
+						new RoomPosition(storage.pos.x - 4, storage.pos.y, room.name),
+						new RoomPosition(storage.pos.x, storage.pos.y + 4, room.name),
+						new RoomPosition(storage.pos.x, storage.pos.y - 4, room.name),
+					];
+
+					let moveAwayPosition: RoomPosition | null = null;
+
+					for (const pos of positions) {
+						if (!creep.room.lookForAt(LOOK_TERRAIN, pos).includes('wall')) {
+							moveAwayPosition = pos;
+							break;
+						}
+					}
+
+					if (moveAwayPosition) {
+						creep.moveTo(moveAwayPosition);
+					}
 					continue;
 				} else {
 					creep.memory.refuelTargetId = room.memory.upgradeContainer;
@@ -305,6 +338,7 @@ export class Supervisor {
 					});
 					if (refuelTarget && refuelTarget.store.getUsedCapacity() >= t.store.getCapacity()) {
 						t.memory.refuelTargetId = refuelTarget.id;
+						t.memory.isIdle = false;
 					} else {
 						t.memory.isIdle = true;
 						continue;
@@ -312,6 +346,7 @@ export class Supervisor {
 				}
 				const target = Game.getObjectById(t.memory.refuelTargetId);
 				if (t.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+					t.memory.isIdle = false;
 					t.moveTo(target);
 				}
 
@@ -402,39 +437,6 @@ export class Supervisor {
 		for (const t of towers) {
 			if (repairTargets.length > 0) {
 				t.repair(repairTargets[0]);
-			}
-		}
-	}
-
-	private static keepDistanceFromContainers(room: Room): void {
-		const idleCreeps: Creep[] = _.filter(room.getCreeps(), (creep) => creep.memory.isIdle);
-		const containers: StructureContainer[] = room.find(FIND_STRUCTURES, {
-			filter: { structureType: STRUCTURE_CONTAINER },
-		}) as StructureContainer[];
-
-		for (const creep of idleCreeps) {
-			for (const container of containers) {
-				if (creep.pos.inRangeTo(container.pos, 4)) {
-					const positions = [
-						new RoomPosition(container.pos.x + 4, container.pos.y, room.name),
-						new RoomPosition(container.pos.x - 4, container.pos.y, room.name),
-						new RoomPosition(container.pos.x, container.pos.y + 4, room.name),
-						new RoomPosition(container.pos.x, container.pos.y - 4, room.name),
-					];
-
-					let moveAwayPosition: RoomPosition | null = null;
-
-					for (const pos of positions) {
-						if (!creep.room.lookForAt(LOOK_TERRAIN, pos).includes('wall')) {
-							moveAwayPosition = pos;
-							break;
-						}
-					}
-
-					if (moveAwayPosition) {
-						creep.moveTo(moveAwayPosition);
-					}
-				}
 			}
 		}
 	}

@@ -13,3 +13,6 @@ This is a incomplete list of all the features I want to include into a specific 
 - Changed hardcoded storage level threshold to a constant in settings.ts
 - Workers now don't clog around the storage, if storage is not full enough
 - Transporters now choose to transport to upgradeContainer, if other transporters already are filling the storage to STORAGE_LEVEL_THRESHOLD
+
+## v0.0.7
+- Idle creeps now move away from all containers, to not clog their area.

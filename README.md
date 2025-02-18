@@ -2,7 +2,7 @@
 
 cipher is an artificial intelligence (AI) written in TypeScript for Screeps, a multiplayer programming strategy game. The aim of this AI is to run completely autonomous without the need of any manual building placement or other human intervention.
 
-**Current version: cipher v0.0.5**
+**Current version: cipher v0.0.6**
 
 ### May I use or modify cipher?
 

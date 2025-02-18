@@ -19,6 +19,7 @@ export class Supervisor {
 		Supervisor.runTasks(room); // Cycles through all creeps of this room and run their tasks
 
 		Supervisor.runTowers(room); // Makes sure, that Towers repair owned structures
+		Supervisor.keepDistanceFromContainers(room); // Ensure idle creeps keep a distance from containers
 	}
 
 	// All creeps completely emtpy and set to idle are filled, before a new Request is assigned to them ===============
@@ -401,6 +402,39 @@ export class Supervisor {
 		for (const t of towers) {
 			if (repairTargets.length > 0) {
 				t.repair(repairTargets[0]);
+			}
+		}
+	}
+
+	private static keepDistanceFromContainers(room: Room): void {
+		const idleCreeps: Creep[] = _.filter(room.getCreeps(), (creep) => creep.memory.isIdle);
+		const containers: StructureContainer[] = room.find(FIND_STRUCTURES, {
+			filter: { structureType: STRUCTURE_CONTAINER },
+		}) as StructureContainer[];
+
+		for (const creep of idleCreeps) {
+			for (const container of containers) {
+				if (creep.pos.inRangeTo(container.pos, 4)) {
+					const positions = [
+						new RoomPosition(container.pos.x + 4, container.pos.y, room.name),
+						new RoomPosition(container.pos.x - 4, container.pos.y, room.name),
+						new RoomPosition(container.pos.x, container.pos.y + 4, room.name),
+						new RoomPosition(container.pos.x, container.pos.y - 4, room.name),
+					];
+
+					let moveAwayPosition: RoomPosition | null = null;
+
+					for (const pos of positions) {
+						if (!creep.room.lookForAt(LOOK_TERRAIN, pos).includes('wall')) {
+							moveAwayPosition = pos;
+							break;
+						}
+					}
+
+					if (moveAwayPosition) {
+						creep.moveTo(moveAwayPosition);
+					}
+				}
 			}
 		}
 	}

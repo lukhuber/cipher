@@ -276,7 +276,7 @@ export class Supervisor {
 
 		const miningContainers = new Array<StructureContainer>();
 
-		// Get mining containers in an array, to send the transporter to refuel there
+		// Get mining containers in an array, for later use
 		for (const id of room.memory.miningContainers) {
 			if (id) {
 				const container = Game.getObjectById(id);
@@ -312,16 +312,22 @@ export class Supervisor {
 					t.moveTo(target);
 				}
 
-				// If the transporter is not empty, it should fill storage to at least the threshold, else fill upgrade container
-			} else if (t.store.getUsedCapacity() != 0 && storageLevel < STORAGE_LEVEL_THRESHOLD) {
-				delete t.memory.refuelTargetId;
-				if (t.transfer(storage, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-					t.moveTo(storage);
-				}
+			// If the transporter is not empty, it should fill storage to at least the threshold, else fill upgrade container
 			} else if (t.store.getUsedCapacity() != 0) {
-				delete t.memory.refuelTargetId;
-				if (t.transfer(upgradeContainer, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-					t.moveTo(upgradeContainer);
+				const otherTransportersCapacity = _.sum(
+					_.filter(transporters, (otherT) => otherT.memory.refuelTargetId === storage.id && otherT.id !== t.id),
+					(otherT) => otherT.store.getUsedCapacity()
+				);
+				if (storageLevel + otherTransportersCapacity < STORAGE_LEVEL_THRESHOLD) {
+					delete t.memory.refuelTargetId;
+					if (t.transfer(storage, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+						t.moveTo(storage);
+					}
+				} else {
+					delete t.memory.refuelTargetId;
+					if (t.transfer(upgradeContainer, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+						t.moveTo(upgradeContainer);
+					}
 				}
 			}
 		}

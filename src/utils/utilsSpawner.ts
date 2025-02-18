@@ -98,6 +98,10 @@ function getTransporterParts(room: Room): BodyPartConstant[] {
     return parts;
 }
 
+function getScoutParts(room: Room): BodyPartConstant[] {
+    return [MOVE];
+}
+
 export function getBodyParts(role: string | undefined, room: Room): BodyPartConstant[] {
     switch (role) {
         case 'harvester':
@@ -110,6 +114,8 @@ export function getBodyParts(role: string | undefined, room: Room): BodyPartCons
             return getTransporterParts(room);
         case 'janitor':
             return getJanitorParts(room);
+        case 'scout':
+            return getScoutParts(room);
         default:
             return [WORK, CARRY, MOVE, MOVE];
     }

@@ -46,4 +46,4 @@ type Request = UpgradeRequest | SpawnRequest | TransportRequest | RefuelRequest;
 
 type Task = RefuelTask | UpgradeTask;
 
-type Roles = 'harvester' | 'worker' | 'upgrader' | 'transporter' | 'janitor';
+type Roles = 'harvester' | 'worker' | 'upgrader' | 'transporter' | 'janitor' | 'scout' ;

@@ -9,6 +9,9 @@ interface RoomMemory {
 	containersBuilt: boolean;
 	janitorPresent: boolean;
 	transporterPresent: boolean;
+	isPrimaryRoom: boolean;
+	exits: ExitsInformation;
+	isScoutNeeded: boolean;
 }
 
 interface FlagMemory {

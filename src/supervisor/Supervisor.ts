@@ -46,7 +46,7 @@ export class Supervisor {
 					target.store.getUsedCapacity(RESOURCE_ENERGY) === 0
 				) {
 					delete creep.memory.refuelTargetId;
-					// Move away if the target is empty
+					// Move away if the target is empty to not clog up around the target (container)
 					const positions = [
 						new RoomPosition(target.pos.x + 4, target.pos.y, room.name),
 						new RoomPosition(target.pos.x - 4, target.pos.y, room.name),

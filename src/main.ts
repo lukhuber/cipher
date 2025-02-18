@@ -26,6 +26,7 @@ import { Memory } from './memory/Memory';
 import { Architect } from './architect/Architect';
 import { Manager } from './manager/Manager';
 import { Supervisor } from './supervisor/Supervisor';
+import { Pioneer } from './pioneer/Pioneer';
 import { Visuals } from './visuals/Visuals';
 // ====================================================================================================================
 
@@ -47,8 +48,9 @@ export const loop = ErrorMapper.wrapLoop(() => {
 			Architect.run(room); // Place construction sites
 			Manager.init(room); // Makes sure, that structures are assigned their role
 			Manager.run(room); // Create request for undone work
-			Supervisor.init(room); // Assign requests to creeps/spawns/towers/etc.
+			Supervisor.init(room); // Assign requests to creeps/spawns/towers/etc
 			Supervisor.run(room); // Do the assigned requests
+			Pioneer.run(room); // Responsible for scouting and harvesting secondary rooms
 		}
 
 		// Show room statistics ---------------------------------------------------------------------------------------
